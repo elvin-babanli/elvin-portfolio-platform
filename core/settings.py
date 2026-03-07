@@ -41,9 +41,40 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'main',
+    'accounts',
     'django.contrib.sitemaps',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.linkedin_oauth2',
 ]
+
+SITE_ID = 1
+
+LOGIN_URL = '/auth/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/auth/login/'
+
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+
+AUTHENTICATION_BACKENDS = [
+    "accounts.backend.EmailOrUsernameBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"access_type": "online"},
+    },
+    "linkedin_oauth2": {
+        "SCOPE": ["r_liteprofile", "r_emailaddress"],
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -52,6 +83,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -141,3 +173,13 @@ CACHES = {
         "LOCATION": "home-feed-cache",
     }
 }
+
+# Email: dev=console (prints to terminal); prod=SMTP via env
+_email_backend = config("EMAIL_BACKEND", default="")
+EMAIL_BACKEND = _email_backend or "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@codebase.local")
+EMAIL_HOST = config("EMAIL_HOST", default="")
+EMAIL_PORT = config("EMAIL_PORT", default=587)
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", default="True") == "True"
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")

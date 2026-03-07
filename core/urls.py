@@ -23,6 +23,7 @@ from main import views
 from main.weather_app import weather_project_view, weather_api
 from main.stock_predictor import stock_predictor_view
 from main.cheap_flight_finder import cheap_flight_finder_view
+from main.todo import todo_page, todo_task_detail_api, todo_toggle_api
 
 from django.contrib.sitemaps.views import sitemap
 from main.sitemap import StaticViewSitemap
@@ -31,7 +32,9 @@ sitemaps = {"static": StaticViewSitemap}
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include("main.urls")),  # ana səhifə (main.urls)
+    path("auth/", include("accounts.urls")),
+    path("accounts/", include("allauth.urls")),
+    path("", include("main.urls")),
 
     path("django/", get_django, name="django"),
     path("flask/", get_flask, name="flask"),
@@ -46,6 +49,10 @@ urlpatterns = [
     path("about/", views.about, name="about"),
     path("4o4-page/", get4o4, name="4o4-page"),
     path("valentine-page/", valentine_page, name="valentine-page"), # Just for Test
+
+    path("todo/", todo_page, name="todo"),
+    path("todo/api/task/<int:task_id>/", todo_task_detail_api, name="todo_task_api"),
+    path("todo/api/task/<int:task_id>/toggle/", todo_toggle_api, name="todo_toggle_api"),
 
     path("stock-predictor/", stock_predictor_view, name="stock-predictor"),
     path("cheap-flight-finder/", cheap_flight_finder_view, name="cheap_flight_finder"),

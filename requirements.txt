@@ -1,4 +1,7 @@
 Django
+django-allauth
+PyJWT
+cryptography
 gunicorn
 whitenoise
 asgiref

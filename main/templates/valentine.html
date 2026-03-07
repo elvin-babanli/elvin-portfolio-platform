@@ -568,7 +568,7 @@
       if(guard > 70) break;
     } while(qadağaZonaVar(x + bw/2, y + bh/2));
 
-    noYerQur(x, y);
+    noYerQur(x + bw/2, y + bh/2);
   }
 
   // Stars / Broken / Heart
@@ -788,15 +788,19 @@
       setTimeout(()=>noBtn.classList.remove("break5s"), 5000);
       return;
     }
-    if(noKlik===3){ noYerQur(26,26); return; }
+    if(noKlik===3){
+      const r=noBtn.getBoundingClientRect();
+      noYerQur(26 + r.width/2, 26 + r.height/2);
+      return;
+    }
     if(noKlik===4){
       const r=noBtn.getBoundingClientRect();
-      noYerQur(innerWidth - r.width - 26, innerHeight - r.height - 26);
+      noYerQur(innerWidth - 26 - r.width/2, innerHeight - 26 - r.height/2);
       return;
     }
     if(noKlik===6){
       const r=noBtn.getBoundingClientRect();
-      noYerQur((innerWidth - r.width)/2, 22);
+      noYerQur(innerWidth/2, 22 + r.height/2);
       return;
     }
 

@@ -1,0 +1,1170 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Todo — Task Management{% endblock %}
+
+{% block container_class %}container-fluid px-0{% endblock %}
+
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --todo-bg: #f8fafc;
+  --todo-surface: #ffffff;
+  --todo-surface-elevated: #ffffff;
+  --todo-border: #e2e8f0;
+  --todo-text: #0f172a;
+  --todo-text-muted: #64748b;
+  --todo-accent: #6366f1;
+  --todo-accent-hover: #4f46e5;
+  --todo-accent-muted: rgba(99, 102, 241, 0.12);
+  --todo-success: #10b981;
+  --todo-success-muted: rgba(16, 185, 129, 0.12);
+  --todo-warning: #f59e0b;
+  --todo-danger: #ef4444;
+  --todo-danger-muted: rgba(239, 68, 68, 0.12);
+  --todo-radius: 14px;
+  --todo-radius-sm: 10px;
+  --todo-shadow: 0 4px 20px rgba(0,0,0,.06);
+  --todo-shadow-hover: 0 8px 30px rgba(0,0,0,.1);
+  --todo-transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="dark"] {
+  --todo-bg: #0f172a;
+  --todo-surface: #1e293b;
+  --todo-surface-elevated: #334155;
+  --todo-border: #334155;
+  --todo-text: #f8fafc;
+  --todo-text-muted: #94a3b8;
+  --todo-accent-muted: rgba(99, 102, 241, 0.2);
+  --todo-success-muted: rgba(16, 185, 129, 0.2);
+  --todo-danger-muted: rgba(239, 68, 68, 0.2);
+  --todo-shadow: 0 4px 20px rgba(0,0,0,.25);
+  --todo-shadow-hover: 0 8px 30px rgba(0,0,0,.35);
+}
+
+.todo-app {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  background: var(--todo-bg);
+  overflow: hidden;
+  min-height: calc(100vh - 56px);
+  animation: todoFadeIn 0.5s ease;
+}
+
+main:has(.todo-app) { padding-top: 0; padding-bottom: 0; }
+
+@keyframes todoFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Layout */
+.todo-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr 360px;
+  min-height: calc(100vh - 56px);
+}
+
+@media (max-width: 1200px) {
+  .todo-layout { grid-template-columns: 220px 1fr; }
+  .todo-detail-panel { display: none; }
+}
+
+@media (max-width: 768px) {
+  .todo-layout { grid-template-columns: 1fr; }
+  .todo-sidebar { 
+    position: fixed; 
+    left: -280px; 
+    top: 0; 
+    bottom: 0; 
+    z-index: 1000;
+    width: 280px;
+    transition: left 0.3s ease;
+    box-shadow: 4px 0 24px rgba(0,0,0,.15);
+  }
+  .todo-sidebar.open { left: 0; }
+  .todo-mobile-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.4);
+    z-index: 999;
+  }
+  .todo-mobile-overlay.show { display: block; }
+}
+
+/* Sidebar */
+.todo-sidebar {
+  background: var(--todo-surface);
+  border-right: 1px solid var(--todo-border);
+  padding: 20px 16px;
+  overflow-y: auto;
+}
+
+.todo-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.todo-sidebar-title {
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--todo-text);
+  letter-spacing: -0.02em;
+}
+
+.todo-theme-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--todo-radius-sm);
+  border: 1px solid var(--todo-border);
+  background: var(--todo-surface);
+  color: var(--todo-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--todo-transition);
+}
+
+.todo-theme-btn:hover {
+  background: var(--todo-accent-muted);
+  color: var(--todo-accent);
+}
+
+/* Search */
+.todo-search-wrap {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.todo-search-wrap input {
+  width: 100%;
+  padding: 12px 14px 12px 40px;
+  border: 1px solid var(--todo-border);
+  border-radius: var(--todo-radius-sm);
+  background: var(--todo-bg);
+  color: var(--todo-text);
+  font-size: 0.9rem;
+  transition: var(--todo-transition);
+}
+
+.todo-search-wrap input:focus {
+  outline: none;
+  border-color: var(--todo-accent);
+  box-shadow: 0 0 0 3px var(--todo-accent-muted);
+}
+
+.todo-search-wrap input::placeholder {
+  color: var(--todo-text-muted);
+}
+
+.todo-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--todo-text-muted);
+  pointer-events: none;
+}
+
+/* Section titles */
+.todo-section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--todo-text-muted);
+  margin: 20px 0 8px;
+}
+
+.todo-nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: var(--todo-radius-sm);
+  color: var(--todo-text);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 2px;
+  transition: var(--todo-transition);
+}
+
+.todo-nav-item:hover {
+  background: var(--todo-accent-muted);
+  color: var(--todo-accent);
+}
+
+.todo-nav-item.active {
+  background: var(--todo-accent-muted);
+  color: var(--todo-accent);
+  font-weight: 600;
+}
+
+.todo-nav-count {
+  font-size: 0.8rem;
+  color: var(--todo-text-muted);
+  background: var(--todo-bg);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.todo-nav-item.active .todo-nav-count {
+  background: var(--todo-accent);
+  color: white;
+}
+
+/* List/Tag items */
+.todo-list-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.todo-add-form {
+  margin-top: 8px;
+  padding: 12px;
+  background: var(--todo-bg);
+  border-radius: var(--todo-radius-sm);
+  border: 1px dashed var(--todo-border);
+}
+
+.todo-add-form input {
+  width: 100%;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  border: 1px solid var(--todo-border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  background: var(--todo-surface);
+  color: var(--todo-text);
+}
+
+.todo-add-btn {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px dashed var(--todo-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--todo-text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--todo-transition);
+}
+
+.todo-add-btn:hover {
+  background: var(--todo-accent-muted);
+  color: var(--todo-accent);
+  border-color: var(--todo-accent);
+}
+
+/* Main content area */
+.todo-main {
+  padding: 24px 28px;
+  overflow-y: auto;
+  background: var(--todo-bg);
+}
+
+/* Dashboard header */
+.todo-dashboard-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.todo-dashboard-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--todo-text);
+  letter-spacing: -0.03em;
+}
+
+/* Stats cards */
+.todo-stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.todo-stat-card {
+  flex: 1;
+  min-width: 120px;
+  padding: 16px 18px;
+  background: var(--todo-surface);
+  border-radius: var(--todo-radius-sm);
+  border: 1px solid var(--todo-border);
+  transition: var(--todo-transition);
+  animation: statSlideIn 0.4s ease backwards;
+}
+
+.todo-stat-card:nth-child(1) { animation-delay: 0.05s; }
+.todo-stat-card:nth-child(2) { animation-delay: 0.1s; }
+.todo-stat-card:nth-child(3) { animation-delay: 0.15s; }
+.todo-stat-card:nth-child(4) { animation-delay: 0.2s; }
+
+@keyframes statSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.todo-stat-card:hover {
+  box-shadow: var(--todo-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.todo-stat-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--todo-text);
+  line-height: 1.2;
+}
+
+.todo-stat-label {
+  font-size: 0.8rem;
+  color: var(--todo-text-muted);
+  margin-top: 4px;
+}
+
+/* Progress bar */
+.todo-progress-wrap {
+  margin-bottom: 24px;
+}
+
+.todo-progress-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  color: var(--todo-text-muted);
+}
+
+.todo-progress-bar {
+  height: 8px;
+  background: var(--todo-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.todo-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--todo-accent), #8b5cf6);
+  border-radius: 999px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Filter chips */
+.todo-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.todo-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--todo-text-muted);
+  background: var(--todo-surface);
+  border: 1px solid var(--todo-border);
+  transition: var(--todo-transition);
+}
+
+.todo-chip:hover {
+  background: var(--todo-accent-muted);
+  color: var(--todo-accent);
+  border-color: var(--todo-accent);
+}
+
+.todo-chip.active {
+  background: var(--todo-accent);
+  color: white;
+  border-color: var(--todo-accent);
+}
+
+/* Sort dropdown */
+.todo-sort-select {
+  padding: 8px 12px;
+  border-radius: var(--todo-radius-sm);
+  border: 1px solid var(--todo-border);
+  background: var(--todo-surface);
+  color: var(--todo-text);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Add task button */
+.todo-add-task-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: var(--todo-radius-sm);
+  border: none;
+  background: linear-gradient(135deg, var(--todo-accent), #8b5cf6);
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+  transition: var(--todo-transition);
+}
+
+.todo-add-task-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+}
+
+/* Task form (inline add) */
+.todo-task-form {
+  display: none;
+  padding: 20px;
+  background: var(--todo-surface);
+  border-radius: var(--todo-radius);
+  border: 1px solid var(--todo-border);
+  margin-bottom: 20px;
+  animation: formSlideDown 0.3s ease;
+}
+
+@keyframes formSlideDown {
+  from { opacity: 0; max-height: 0; }
+  to { opacity: 1; max-height: 400px; }
+}
+
+.todo-task-form.show { display: block; }
+
+.todo-task-form input,
+.todo-task-form select,
+.todo-task-form textarea {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  border: 1px solid var(--todo-border);
+  border-radius: var(--todo-radius-sm);
+  font-size: 0.95rem;
+  background: var(--todo-surface);
+  color: var(--todo-text);
+}
+
+.todo-task-form label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--todo-text-muted);
+  margin-bottom: 6px;
+}
+
+/* Task cards */
+.todo-task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.todo-task-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--todo-surface);
+  border: 1px solid var(--todo-border);
+  border-radius: var(--todo-radius);
+  text-decoration: none;
+  color: inherit;
+  transition: var(--todo-transition);
+  animation: taskSlideIn 0.35s ease backwards;
+}
+
+.todo-task-card:hover {
+  border-color: var(--todo-accent);
+  box-shadow: var(--todo-shadow-hover);
+  transform: translateX(4px);
+}
+
+.todo-task-card.selected {
+  border-color: var(--todo-accent);
+  background: var(--todo-accent-muted);
+  box-shadow: 0 0 0 2px var(--todo-accent-muted);
+}
+
+.todo-task-card.completed .todo-task-title {
+  text-decoration: line-through;
+  color: var(--todo-text-muted);
+}
+
+/* Animated checkbox */
+.todo-checkbox-wrap {
+  flex-shrink: 0;
+  position: relative;
+}
+
+.todo-checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin: 0;
+}
+
+.todo-checkbox-wrap input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.todo-checkbox-wrap input[type="checkbox"]:checked + .todo-checkbox-custom {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  border: 2px solid var(--todo-border);
+  background: var(--todo-surface);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--todo-transition);
+}
+
+.todo-checkbox-custom svg {
+  opacity: 0;
+  transform: scale(0.5);
+  transition: var(--todo-transition);
+}
+
+.todo-checkbox-wrap input[type="checkbox"]:checked + .todo-checkbox-custom svg {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.todo-task-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.todo-task-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--todo-text);
+  margin-bottom: 4px;
+}
+
+.todo-task-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--todo-text-muted);
+}
+
+.todo-priority-badge {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.7rem;
+}
+
+.todo-priority-low { background: rgba(34, 197, 94, 0.15); color: #16a34a; }
+[data-theme="dark"] .todo-priority-low { color: #4ade80; }
+.todo-priority-medium { background: rgba(245, 158, 11, 0.15); color: #d97706; }
+[data-theme="dark"] .todo-priority-medium { color: #fbbf24; }
+.todo-priority-high { background: rgba(239, 68, 68, 0.15); color: #dc2626; }
+[data-theme="dark"] .todo-priority-high { color: #f87171; }
+
+.todo-list-badge {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+/* Detail panel */
+.todo-detail-panel {
+  background: var(--todo-surface);
+  border-left: 1px solid var(--todo-border);
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.todo-detail-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 300px;
+  color: var(--todo-text-muted);
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.todo-detail-empty-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+
+.todo-detail-form input,
+.todo-detail-form textarea,
+.todo-detail-form select {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  border: 1px solid var(--todo-border);
+  border-radius: var(--todo-radius-sm);
+  font-size: 0.95rem;
+  background: var(--todo-surface);
+  color: var(--todo-text);
+}
+
+.todo-detail-form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.todo-detail-form label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--todo-text-muted);
+  margin-bottom: 6px;
+}
+
+.todo-detail-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.todo-btn-save {
+  padding: 10px 20px;
+  border-radius: var(--todo-radius-sm);
+  border: none;
+  background: linear-gradient(135deg, var(--todo-accent), #8b5cf6);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--todo-transition);
+}
+
+.todo-btn-save:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+}
+
+.todo-btn-delete {
+  padding: 10px 18px;
+  border-radius: var(--todo-radius-sm);
+  border: 1px solid var(--todo-border);
+  background: transparent;
+  color: var(--todo-text-muted);
+  cursor: pointer;
+  transition: var(--todo-transition);
+}
+
+.todo-btn-delete:hover {
+  background: var(--todo-danger-muted);
+  color: var(--todo-danger);
+  border-color: var(--todo-danger);
+}
+
+/* Subtasks */
+.todo-subtask-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--todo-border);
+}
+
+.todo-subtask-item:last-child { border-bottom: none; }
+
+.todo-subtask-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.todo-subtask-item.completed span {
+  text-decoration: line-through;
+  color: var(--todo-text-muted);
+}
+
+/* Empty state */
+.todo-empty-state {
+  text-align: center;
+  padding: 60px 24px;
+  animation: emptyFadeIn 0.5s ease;
+}
+
+@keyframes emptyFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.todo-empty-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  background: var(--todo-accent-muted);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--todo-accent);
+}
+
+.todo-empty-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--todo-text);
+  margin-bottom: 8px;
+}
+
+.todo-empty-text {
+  color: var(--todo-text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 20px;
+}
+
+/* Mobile menu button */
+.todo-mobile-menu-btn {
+  display: none;
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--todo-accent), #8b5cf6);
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+  z-index: 998;
+  transition: var(--todo-transition);
+}
+
+@media (max-width: 768px) {
+  .todo-mobile-menu-btn { display: flex; align-items: center; justify-content: center; }
+  .todo-main { padding-bottom: 100px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="todo-app">
+  <div class="todo-mobile-overlay" id="todoMobileOverlay"></div>
+  <button class="todo-mobile-menu-btn" id="todoMobileMenuBtn" type="button" aria-label="Open menu">☰</button>
+
+  <div class="todo-layout">
+    <aside class="todo-sidebar" id="todoSidebar">
+      <div class="todo-sidebar-header">
+        <span class="todo-sidebar-title">Tasks</span>
+        <button type="button" class="todo-theme-btn" id="todoThemeBtn" aria-label="Toggle theme">🌙</button>
+      </div>
+
+      <form method="get" class="todo-search-wrap" id="todoSearchForm">
+        <span class="todo-search-icon">🔍</span>
+        <input type="text" name="q" value="{{ search_q }}" placeholder="Search tasks..." aria-label="Search">
+        {% for key, val in request.GET.items %}
+          {% if key != 'q' %}<input type="hidden" name="{{ key }}" value="{{ val }}">{% endif %}
+        {% endfor %}
+      </form>
+
+      <div class="todo-section-title">Views</div>
+      <a href="?filter=all{% if completed_filter %}&completed={{ completed_filter }}{% endif %}{% if search_q %}&q={{ search_q }}{% endif %}&sort={{ sort_by }}" class="todo-nav-item {% if filter_type == 'all' %}active{% endif %}">
+        <span>All Tasks</span>
+        <span class="todo-nav-count">{{ total_tasks }}</span>
+      </a>
+      <a href="?filter=today{% if completed_filter %}&completed={{ completed_filter }}{% endif %}{% if search_q %}&q={{ search_q }}{% endif %}&sort={{ sort_by }}" class="todo-nav-item {% if filter_type == 'today' %}active{% endif %}">
+        <span>Today</span>
+        <span class="todo-nav-count">{{ today_count }}</span>
+      </a>
+      <a href="?filter=upcoming{% if completed_filter %}&completed={{ completed_filter }}{% endif %}{% if search_q %}&q={{ search_q }}{% endif %}&sort={{ sort_by }}" class="todo-nav-item {% if filter_type == 'upcoming' %}active{% endif %}">
+        <span>Upcoming</span>
+        <span class="todo-nav-count">{{ upcoming_count }}</span>
+      </a>
+      <a href="?filter=overdue{% if search_q %}&q={{ search_q }}{% endif %}&sort={{ sort_by }}" class="todo-nav-item {% if filter_type == 'overdue' %}active{% endif %}">
+        <span>Overdue</span>
+        <span class="todo-nav-count">{{ overdue_count }}</span>
+      </a>
+
+      <div class="todo-section-title">Lists</div>
+      {% for item in lists_with_counts %}
+      <a href="?filter=list&list_id={{ item.list.id }}{% if completed_filter %}&completed={{ completed_filter }}{% endif %}{% if search_q %}&q={{ search_q }}{% endif %}&sort={{ sort_by }}" class="todo-nav-item {% if filter_type == 'list' and list_id == item.list.id %}active{% endif %}">
+        <span style="display:flex;align-items:center;">
+          <span class="todo-list-dot" style="background:{{ item.list.color }}"></span>
+          {{ item.list.name }}
+        </span>
+        <span class="todo-nav-count">{{ item.count }}</span>
+      </a>
+      {% empty %}
+      <p style="font-size:0.85rem;color:var(--todo-text-muted);margin:8px 0;">No lists yet</p>
+      {% endfor %}
+      <form method="post" class="todo-add-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="create_list">
+        <input type="text" name="list_name" placeholder="New list name" required>
+        <input type="text" name="list_color" value="#6366f1" placeholder="#hex">
+        <button type="submit" class="todo-add-btn">+ Add List</button>
+      </form>
+
+      <div class="todo-section-title">Tags</div>
+      {% for item in tags_with_counts %}
+      <a href="?filter=tag&tag_id={{ item.tag.id }}{% if completed_filter %}&completed={{ completed_filter }}{% endif %}{% if search_q %}&q={{ search_q }}{% endif %}&sort={{ sort_by }}" class="todo-nav-item {% if filter_type == 'tag' and tag_id == item.tag.id %}active{% endif %}">
+        <span class="todo-list-badge" style="background:{{ item.tag.color }}25;color:{{ item.tag.color }}">{{ item.tag.name }}</span>
+        <span class="todo-nav-count">{{ item.count }}</span>
+      </a>
+      {% empty %}
+      <p style="font-size:0.85rem;color:var(--todo-text-muted);margin:8px 0;">No tags yet</p>
+      {% endfor %}
+      <form method="post" class="todo-add-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="create_tag">
+        <input type="text" name="tag_name" placeholder="New tag name" required>
+        <input type="text" name="tag_color" value="#06b6d4" placeholder="#hex">
+        <button type="submit" class="todo-add-btn">+ Add Tag</button>
+      </form>
+    </aside>
+
+    <section class="todo-main">
+      <div class="todo-dashboard-header">
+        <h1 class="todo-dashboard-title">
+          {% if filter_type == 'today' %}Today
+          {% elif filter_type == 'upcoming' %}Upcoming
+          {% elif filter_type == 'overdue' %}Overdue
+          {% elif filter_type == 'list' and list_id %}Tasks
+          {% elif filter_type == 'tag' and tag_id %}Tasks
+          {% else %}All Tasks
+          {% endif %}
+        </h1>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <select class="todo-sort-select" id="todoSortSelect" onchange="applySort(this.value)">
+            <option value="date" {% if sort_by == 'date' %}selected{% endif %}>Sort: Due Date</option>
+            <option value="priority" {% if sort_by == 'priority' %}selected{% endif %}>Sort: Priority</option>
+            <option value="alpha" {% if sort_by == 'alpha' %}selected{% endif %}>Sort: A–Z</option>
+          </select>
+          <button type="button" class="todo-add-task-btn" id="todoAddTaskBtn">
+            <span>+</span> Add Task
+          </button>
+        </div>
+      </div>
+
+      <div class="todo-stats">
+        <div class="todo-stat-card">
+          <div class="todo-stat-value">{{ total_tasks }}</div>
+          <div class="todo-stat-label">Total Tasks</div>
+        </div>
+        <div class="todo-stat-card">
+          <div class="todo-stat-value">{{ completed_count }}</div>
+          <div class="todo-stat-label">Completed</div>
+        </div>
+        <div class="todo-stat-card">
+          <div class="todo-stat-value">{{ pending_count }}</div>
+          <div class="todo-stat-label">Pending</div>
+        </div>
+        <div class="todo-stat-card">
+          <div class="todo-stat-value">{% if total_tasks %}{% widthratio completed_count total_tasks 100 %}%{% else %}0%{% endif %}</div>
+          <div class="todo-stat-label">Progress</div>
+        </div>
+      </div>
+
+      <div class="todo-progress-wrap">
+        <div class="todo-progress-header">
+          <span>Completion Progress</span>
+          <span>{% if total_tasks %}{% widthratio completed_count total_tasks 100 %}%{% else %}0%{% endif %}</span>
+        </div>
+        <div class="todo-progress-bar">
+          <div class="todo-progress-fill" style="width: {% if total_tasks %}{% widthratio completed_count total_tasks 100 %}%{% else %}0{% endif %}"></div>
+        </div>
+      </div>
+
+      <div class="todo-filter-chips">
+        <a href="?{% if list_id %}list_id={{ list_id }}&{% endif %}{% if tag_id %}tag_id={{ tag_id }}&{% endif %}filter={{ filter_type }}{% if search_q %}&q={{ search_q }}{% endif %}&sort={{ sort_by }}" class="todo-chip {% if not completed_filter %}active{% endif %}">All</a>
+        <a href="?{% if list_id %}list_id={{ list_id }}&{% endif %}{% if tag_id %}tag_id={{ tag_id }}&{% endif %}filter={{ filter_type }}&completed=pending{% if search_q %}&q={{ search_q }}{% endif %}&sort={{ sort_by }}" class="todo-chip {% if completed_filter == 'pending' %}active{% endif %}">Pending</a>
+        <a href="?{% if list_id %}list_id={{ list_id }}&{% endif %}{% if tag_id %}tag_id={{ tag_id }}&{% endif %}filter={{ filter_type }}&completed=completed{% if search_q %}&q={{ search_q }}{% endif %}&sort={{ sort_by }}" class="todo-chip {% if completed_filter == 'completed' %}active{% endif %}">Completed</a>
+      </div>
+
+      <form id="todoTaskForm" method="post" class="todo-task-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="create_task">
+        <label>Task Title</label>
+        <input type="text" name="title" placeholder="What needs to be done?" required>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label>Due Date</label>
+            <input type="date" name="due_date" value="{{ today|date:'Y-m-d' }}">
+          </div>
+          <div>
+            <label>Priority</label>
+            <select name="priority">
+              <option value="0">Low</option>
+              <option value="1" selected>Medium</option>
+              <option value="2">High</option>
+            </select>
+          </div>
+        </div>
+        <label>List (optional)</label>
+        <select name="list_id">
+          <option value="">— No list —</option>
+          {% for lst in lists %}
+          <option value="{{ lst.id }}" {% if list_id == lst.id %}selected{% endif %}>{{ lst.name }}</option>
+          {% endfor %}
+        </select>
+        <div style="display:flex;gap:10px;margin-top:12px;">
+          <button type="submit" class="todo-add-task-btn">Create Task</button>
+          <button type="button" class="todo-btn-delete" id="todoCancelAdd">Cancel</button>
+        </div>
+      </form>
+
+      <div class="todo-task-list">
+        {% for task in tasks %}
+        <a href="?filter={{ filter_type }}{% if list_id %}&list_id={{ list_id }}{% endif %}{% if tag_id %}&tag_id={{ tag_id }}{% endif %}{% if completed_filter %}&completed={{ completed_filter }}{% endif %}{% if search_q %}&q={{ search_q }}{% endif %}&sort={{ sort_by }}&task_id={{ task.id }}" class="todo-task-card {% if selected_task and selected_task.id == task.id %}selected{% endif %} {% if task.completed %}completed{% endif %}">
+          <div class="todo-checkbox-wrap" onclick="event.preventDefault();event.stopPropagation();">
+            <form method="post" class="todo-toggle-form" data-task-id="{{ task.id }}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="toggle_task">
+              <input type="hidden" name="task_id" value="{{ task.id }}">
+              <label class="todo-checkbox-label">
+                <input type="checkbox" {% if task.completed %}checked{% endif %} onchange="handleToggle(this)">
+                <span class="todo-checkbox-custom">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M5 12l5 5L19 7"/></svg>
+                </span>
+              </label>
+            </form>
+          </div>
+          <div class="todo-task-body">
+            <div class="todo-task-title">{{ task.title }}</div>
+            <div class="todo-task-meta">
+              {% if task.priority == 2 %}<span class="todo-priority-badge todo-priority-high">High</span>{% endif %}
+              {% if task.priority == 1 %}<span class="todo-priority-badge todo-priority-medium">Medium</span>{% endif %}
+              {% if task.priority == 0 %}<span class="todo-priority-badge todo-priority-low">Low</span>{% endif %}
+              {% if task.due_date %}<span>📅 {{ task.due_date|date:"M d, Y" }}</span>{% endif %}
+              {% if task.list %}<span class="todo-list-badge" style="background:{{ task.list.color }}25;color:{{ task.list.color }}">{{ task.list.name }}</span>{% endif %}
+              {% if task.subtasks.count %}<span>{{ task.completed_subtask_count }}/{{ task.subtasks.count }} subtasks</span>{% endif %}
+            </div>
+          </div>
+          <span style="color:var(--todo-text-muted);font-size:1.2rem;">›</span>
+        </a>
+        {% empty %}
+        <div class="todo-empty-state">
+          <div class="todo-empty-icon">✓</div>
+          <div class="todo-empty-title">No tasks yet</div>
+          <div class="todo-empty-text">Add your first task to get started and stay organized.</div>
+          <button type="button" class="todo-add-task-btn" onclick="document.getElementById('todoAddTaskBtn').click()">+ Add Task</button>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <aside class="todo-detail-panel">
+      {% if selected_task %}
+      <form method="post" class="todo-detail-form" id="todoDetailForm">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update_task">
+        <input type="hidden" name="task_id" value="{{ selected_task.id }}">
+        <label>Title</label>
+        <input type="text" name="title" value="{{ selected_task.title }}" required>
+        <label>Description</label>
+        <textarea name="description">{{ selected_task.description }}</textarea>
+        <label>List</label>
+        <select name="list_id">
+          <option value="">— None —</option>
+          {% for lst in lists %}
+          <option value="{{ lst.id }}" {% if selected_task.list_id == lst.id %}selected{% endif %}>{{ lst.name }}</option>
+          {% endfor %}
+        </select>
+        <label>Due Date</label>
+        <input type="date" name="due_date" value="{{ selected_task.due_date|date:'Y-m-d' }}">
+        <label>Priority</label>
+        <select name="priority">
+          <option value="0" {% if selected_task.priority == 0 %}selected{% endif %}>Low</option>
+          <option value="1" {% if selected_task.priority == 1 %}selected{% endif %}>Medium</option>
+          <option value="2" {% if selected_task.priority == 2 %}selected{% endif %}>High</option>
+        </select>
+        <label>Tags</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+          {% for tag in tags %}
+          <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="checkbox" name="tags" value="{{ tag.id }}" {% if tag in selected_task.tags.all %}checked{% endif %}>
+            <span class="todo-list-badge" style="background:{{ tag.color }}25;color:{{ tag.color }}">{{ tag.name }}</span>
+          </label>
+          {% endfor %}
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" name="completed" {% if selected_task.completed %}checked{% endif %}>
+          <span>Mark as completed</span>
+        </label>
+
+        <div class="todo-section-title" style="margin-top:20px;">Subtasks</div>
+        {% for st in selected_task.subtasks.all %}
+        <div class="todo-subtask-item {% if st.completed %}completed{% endif %}">
+          <form method="post" style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="toggle_subtask">
+            <input type="hidden" name="subtask_id" value="{{ st.id }}">
+            <input type="checkbox" {% if st.completed %}checked{% endif %} onchange="this.form.submit()">
+          </form>
+          <span>{{ st.title }}</span>
+        </div>
+        {% endfor %}
+        <form method="post" style="margin-top:12px;">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="create_subtask">
+          <input type="hidden" name="task_id" value="{{ selected_task.id }}">
+          <input type="text" name="subtask_title" placeholder="Add subtask..." style="margin-bottom:8px;">
+          <button type="submit" class="todo-add-btn">+ Add Subtask</button>
+        </form>
+
+        <div class="todo-detail-actions">
+          <button type="submit" class="todo-btn-save">Save Changes</button>
+          <form method="post" style="display:inline;" onsubmit="return confirm('Delete this task?');">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete_task">
+            <input type="hidden" name="task_id" value="{{ selected_task.id }}">
+            <button type="submit" class="todo-btn-delete">Delete</button>
+          </form>
+        </div>
+      </form>
+      {% else %}
+      <div class="todo-detail-empty">
+        <div class="todo-detail-empty-icon">📋</div>
+        <p>Select a task to view and edit details</p>
+      </div>
+      {% endif %}
+    </aside>
+  </div>
+</div>
+
+<script>
+(function() {
+  const themeBtn = document.getElementById('todoThemeBtn');
+  const html = document.documentElement;
+  const savedTheme = localStorage.getItem('todo-theme') || 'light';
+  if (savedTheme === 'dark') {
+    html.setAttribute('data-theme', 'dark');
+    themeBtn.textContent = '☀️';
+  }
+  themeBtn.addEventListener('click', function() {
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? '' : 'dark');
+    themeBtn.textContent = isDark ? '🌙' : '☀️';
+    localStorage.setItem('todo-theme', isDark ? 'light' : 'dark');
+  });
+
+  const addBtn = document.getElementById('todoAddTaskBtn');
+  const taskForm = document.getElementById('todoTaskForm');
+  const cancelBtn = document.getElementById('todoCancelAdd');
+  addBtn.addEventListener('click', function() {
+    taskForm.classList.add('show');
+    taskForm.querySelector('input[name="title"]').focus();
+  });
+  cancelBtn.addEventListener('click', function() {
+    taskForm.classList.remove('show');
+  });
+
+  const sortSelect = document.getElementById('todoSortSelect');
+  function applySort(val) {
+    const u = new URL(window.location.href);
+    u.searchParams.set('sort', val);
+    window.location = u.toString();
+  }
+
+  const searchForm = document.getElementById('todoSearchForm');
+  const searchInput = searchForm.querySelector('input[name="q"]');
+  let searchTimeout;
+  searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function() {
+      searchForm.submit();
+    }, 400);
+  });
+
+  function showToast(message, type) {
+    if (window.showToast) window.showToast(message, type || 'success');
+  }
+
+  function getCookie(name) {
+    let v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return v ? v.pop() : '';
+  }
+
+  window.handleToggle = function(input) {
+    const form = input.closest('form');
+    const taskId = form.dataset.taskId;
+    const card = form.closest('.todo-task-card');
+    const csrf = getCookie('csrftoken') || form.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
+
+    fetch('/todo/api/task/' + taskId + '/toggle/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': csrf,
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: 'csrfmiddlewaretoken=' + encodeURIComponent(csrf)
+    })
+    .then(r => r.json())
+    .then(function(data) {
+      if (data.completed) {
+        card.classList.add('completed');
+        showToast('Task completed!', 'success');
+      } else {
+        card.classList.remove('completed');
+        showToast('Task reopened', 'success');
+      }
+    })
+    .catch(function() {
+      form.submit();
+    });
+  };
+
+  const sidebar = document.getElementById('todoSidebar');
+  const overlay = document.getElementById('todoMobileOverlay');
+  const menuBtn = document.getElementById('todoMobileMenuBtn');
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('show');
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('show');
+  }
+  menuBtn.addEventListener('click', openSidebar);
+  overlay.addEventListener('click', closeSidebar);
+
+  var q = window.location.search;
+  if (q.includes('created=1')) {
+    showToast('Task created successfully!', 'success');
+  } else if (q.includes('updated=1')) {
+    showToast('Task updated!', 'success');
+  } else if (q.includes('deleted=1')) {
+    showToast('Task deleted.', 'success');
+  }
+})();
+</script>
+{% endblock %}

@@ -1,22 +1,11 @@
-import requests, time
-from django.shortcuts import render, redirect
-from .home_news import get_home_feed
-
+from django.shortcuts import render
 from django.http import HttpResponse
 
-def home(request):
-    return HttpResponse("Elvin CodeBase — It works!")
+from .home_news import get_home_feed
 
-
-
-# 4o4-page_____________________________________________
 
 def get4o4(request):
-    return render(request,"4o4.html")
-
-
-def index(request):
-    return render(request, "index.html")
+    return render(request, "4o4.html")
 
 # Frameworks____________________________________________
 def get_django(request):
@@ -55,56 +44,6 @@ def valentine_page(request):
 
 # def weather_app(request):
 #     return render(request, "weather_app.html")
-
-# Home__________________________________________________
-
-
-def index(request):
-    articles = get_home_feed()
-    return render(request, "index.html", {"articles": articles})
-
-
-
-
-
-FEEDS = [
-    "https://www.python.org/blogs/rss/",
-    "https://pyfound.blogspot.com/feeds/posts/default?alt=rss",
-    "https://realpython.com/atom.xml",
-]
-CACHE = {"items": [], "ts": 0}
-TTL = 60 * 60  # 1 saat
-
-def fetch_news():
-    items = []
-    for url in FEEDS:
-        try:
-            r = requests.get(url, timeout=5)
-            r.raise_for_status()
-            text = r.text
-            # çox sadə parsing: başlıqları tapırıq (tam parser istəyirsənsə feedparser istifadə et)
-            # Burada minimal saxlayıram; prod-da feedparser tövsiyədir.
-            for line in text.splitlines():
-                if "<title>" in line and "</title>" in line:
-                    title = line.split("<title>")[1].split("</title>")[0]
-                    if title and "Python.org" not in title:
-                        items.append({"title": title[:120], "link": url})
-        except Exception:
-            continue
-    # təmizləmə & limit
-    uniq = []
-    seen = set()
-    for it in items:
-        t = it["title"]
-        if t not in seen:
-            seen.add(t)
-            uniq.append(it)
-        if len(uniq) >= 8:
-            break
-    return uniq
-
-
-
 
 def home(request):
     articles_ai = get_home_feed()

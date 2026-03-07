@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Profile — Account Settings{% endblock %}
+
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --profile-bg: #f8fafc;
+  --profile-surface: #ffffff;
+  --profile-border: #e2e8f0;
+  --profile-text: #0f172a;
+  --profile-muted: #64748b;
+  --profile-accent: #2563eb;
+  --profile-success: #10b981;
+}
+
+.profile-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  animation: profileReveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes profileReveal {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.profile-header {
+  margin-bottom: 40px;
+}
+
+.profile-header h1 {
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: var(--profile-text);
+  letter-spacing: -0.03em;
+  margin: 0 0 8px;
+}
+
+.profile-header p {
+  color: var(--profile-muted);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.profile-card {
+  background: var(--profile-surface);
+  border-radius: 20px;
+  border: 1px solid var(--profile-border);
+  box-shadow: 0 4px 24px rgba(0,0,0,.06);
+  padding: 32px 36px;
+  margin-bottom: 24px;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  animation: cardEnter 0.5s ease backwards;
+}
+
+.profile-card:nth-child(2) { animation-delay: 0.06s; }
+.profile-card:nth-child(3) { animation-delay: 0.1s; }
+.profile-card:nth-child(4) { animation-delay: 0.14s; }
+
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.profile-card:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,.08);
+}
+
+.profile-card h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--profile-text);
+  margin: 0 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-card h2 .icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--profile-accent), #3b82f6);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.profile-field {
+  margin-bottom: 20px;
+}
+
+.profile-field:last-child { margin-bottom: 0; }
+
+.profile-field label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--profile-muted);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.profile-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--profile-border);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  color: var(--profile-text);
+  background: #fff;
+  transition: all 0.25s ease;
+}
+
+.profile-input:focus {
+  outline: none;
+  border-color: var(--profile-accent);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.profile-input.read-only {
+  background: #f8fafc;
+  color: var(--profile-muted);
+  cursor: not-allowed;
+}
+
+.profile-input.read-only:focus {
+  border-color: var(--profile-border);
+  box-shadow: none;
+}
+
+/* Phone: country + number row */
+.profile-phone-row {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.profile-phone-country {
+  width: 140px;
+  min-width: 120px;
+  padding: 12px 14px;
+  border: 1px solid var(--profile-border);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  color: var(--profile-text);
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.profile-phone-country:focus {
+  outline: none;
+  border-color: var(--profile-accent);
+}
+
+.profile-phone-number-wrap {
+  flex: 1;
+}
+
+.profile-phone-number-wrap .profile-input {
+  width: 100%;
+}
+
+/* Date input */
+.profile-date-input {
+  cursor: pointer;
+}
+
+.profile-date-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.profile-err {
+  font-size: 0.8rem;
+  color: #ef4444;
+  margin-top: 6px;
+}
+
+.profile-btn {
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-btn-primary {
+  background: linear-gradient(135deg, var(--profile-accent), #3b82f6);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+}
+
+.profile-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+  color: #fff;
+}
+
+.profile-btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.profile-btn-outline {
+  background: transparent;
+  color: var(--profile-accent);
+  border: 1px solid var(--profile-accent);
+}
+
+.profile-btn-outline:hover {
+  background: rgba(37, 99, 235, 0.08);
+  color: #1d4ed8;
+}
+
+.profile-section-note {
+  font-size: 0.85rem;
+  color: var(--profile-muted);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .profile-page { padding: 32px 16px 60px; }
+  .profile-card { padding: 24px 20px; }
+  .profile-phone-row { flex-direction: column; }
+  .profile-phone-country { width: 100%; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+  <div class="profile-header">
+    <h1>Account Settings</h1>
+    <p>Manage your profile, security, and preferences</p>
+  </div>
+
+  <form method="post" action="" id="profileForm">
+    {% csrf_token %}
+
+    <div class="profile-card">
+      <h2><span class="icon">👤</span> Personal Information</h2>
+
+      <div class="profile-field">
+        <label>Email</label>
+        <input type="email" class="profile-input read-only" value="{{ user.email }}" readonly disabled>
+        <p class="profile-section-note">Email cannot be changed.</p>
+      </div>
+
+      <div class="profile-field">
+        <label for="id_first_name">First name</label>
+        <input type="text" name="first_name" id="id_first_name" class="profile-input" value="{{ profile_form.first_name.value|default:user.first_name }}" placeholder="First name" maxlength="150" required>
+        {% if profile_form.first_name.errors %}<div class="profile-err">{{ profile_form.first_name.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="profile-field">
+        <label for="id_last_name">Last name</label>
+        <input type="text" name="last_name" id="id_last_name" class="profile-input" value="{{ profile_form.last_name.value|default:user.last_name }}" placeholder="Last name" maxlength="150" required>
+        {% if profile_form.last_name.errors %}<div class="profile-err">{{ profile_form.last_name.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="profile-field">
+        <label for="id_birth_date">Date of birth</label>
+        <input type="date" name="birth_date" id="id_birth_date" class="profile-input profile-date-input" value="{% if profile_form.birth_date.value %}{{ profile_form.birth_date.value|date:'Y-m-d' }}{% endif %}">
+        {% if profile_form.birth_date.errors %}<div class="profile-err">{{ profile_form.birth_date.errors.0 }}</div>{% endif %}
+        <p class="profile-section-note">Format: DD/MM/YYYY</p>
+      </div>
+
+      <button type="submit" name="update_profile" class="profile-btn profile-btn-primary" data-loading="Saving...">Save changes</button>
+    </div>
+
+    <div class="profile-card">
+      <h2><span class="icon">📞</span> Contact Information</h2>
+
+      <div class="profile-field">
+        <label>Phone number</label>
+        <div class="profile-phone-row">
+          <select name="phone_country_code" id="id_phone_country_code" class="profile-phone-country">
+            {% for value, label in profile_form.phone_country_code.field.choices %}
+            <option value="{{ value }}" {% if profile_form.phone_country_code.value == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <div class="profile-phone-number-wrap">
+            <input type="text" name="phone_number" id="id_phone_number" class="profile-input profile-phone-number" value="{{ profile_form.phone_number.value|default:'' }}" placeholder="555 123 4567" inputmode="numeric" pattern="[0-9]*" maxlength="15" autocomplete="tel-national">
+          </div>
+        </div>
+        {% if profile_form.phone_number.errors %}<div class="profile-err">{{ profile_form.phone_number.errors.0 }}</div>{% endif %}
+        <p class="profile-section-note">Digits only. Select your country code first.</p>
+      </div>
+
+      <button type="submit" name="update_profile" class="profile-btn profile-btn-primary" data-loading="Saving...">Save changes</button>
+    </div>
+
+    <div class="profile-card">
+      <h2><span class="icon">🔒</span> Security</h2>
+
+      <div class="profile-field">
+        <label for="id_current_password">Current password</label>
+        <input type="password" name="current_password" id="id_current_password" class="profile-input" placeholder="Current password" autocomplete="current-password">
+        {% if password_form.current_password.errors %}<div class="profile-err">{{ password_form.current_password.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="profile-field">
+        <label for="id_new_password1">New password</label>
+        <input type="password" name="new_password1" id="id_new_password1" class="profile-input" placeholder="New password" autocomplete="new-password">
+        {% if password_form.new_password1.errors %}<div class="profile-err">{{ password_form.new_password1.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="profile-field">
+        <label for="id_new_password2">Confirm new password</label>
+        <input type="password" name="new_password2" id="id_new_password2" class="profile-input" placeholder="Confirm new password" autocomplete="new-password">
+        {% if password_form.new_password2.errors %}<div class="profile-err">{{ password_form.new_password2.errors.0 }}</div>{% endif %}
+      </div>
+
+      {% if password_form.non_field_errors %}
+      <div class="profile-err" style="margin-bottom: 16px;">{{ password_form.non_field_errors.0 }}</div>
+      {% endif %}
+
+      <button type="submit" name="change_password" class="profile-btn profile-btn-primary" data-loading="Updating...">Change password</button>
+    </div>
+  </form>
+
+  <div style="margin-top: 32px;">
+    <a href="{% url 'accounts:auth_logout' %}" class="profile-btn profile-btn-outline">Log out</a>
+  </div>
+</div>
+
+<script>
+(function() {
+  var phoneInput = document.getElementById('id_phone_number');
+  if (phoneInput) {
+    phoneInput.addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g, '');
+    });
+    phoneInput.addEventListener('keypress', function(e) {
+      if (e.key && !/\d/.test(e.key) && !e.ctrlKey && !e.metaKey) e.preventDefault();
+    });
+  }
+  document.getElementById('profileForm').addEventListener('submit', function(e) {
+    var submitter = e.submitter;
+    if (submitter && (submitter.name === 'update_profile' || submitter.name === 'change_password')) {
+      submitter.disabled = true;
+      submitter.dataset.origText = submitter.textContent;
+      submitter.textContent = submitter.getAttribute('data-loading') || 'Saving...';
+    }
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "accounts/auth_standalone_base.html" %}
+
+{% block title %}Verify code{% endblock %}
+
+{% block auth_back_url %}{% url 'accounts:auth_forgot_password' %}{% endblock %}
+
+{% block auth_content %}
+<h1>Enter verification code</h1>
+<p class="auth-subtitle">We sent a 6-digit code to <strong>{{ email }}</strong>. The code expires in 1 minute.</p>
+
+{% if code_expired %}
+<p style="font-size: 0.9rem; color: #d97706; margin: -8px 0 20px; display: flex; align-items: center; gap: 8px;">
+  <span>⏱</span> Code expired. Request a new one below.
+</p>
+{% endif %}
+
+<form method="post" action="" id="authVerifyForm" novalidate>
+  {% csrf_token %}
+
+  <div class="auth-input-wrap {% if form.code.errors %}has-error{% endif %}">
+    {{ form.code }}
+    {% if form.code.errors %}<div class="auth-err">{{ form.code.errors.0 }}</div>{% endif %}
+  </div>
+
+  <button type="submit" class="auth-btn auth-btn-primary" id="authSubmitBtn" data-loading-text="Verifying...">
+    <span class="auth-btn-text">Verify & continue</span>
+  </button>
+
+  <button type="submit" name="resend" value="1" class="auth-btn auth-btn-ghost" style="margin-top: 12px;">
+    Resend code
+  </button>
+</form>
+
+<p class="auth-link-wrap">
+  <a href="{% url 'accounts:auth_forgot_password' %}">Use a different email</a>
+</p>
+{% endblock %}
+
+{% block auth_scripts %}
+<script>
+(function() {
+  var codeInput = document.querySelector('.auth-code-input, input[name="code"]');
+  if (codeInput) {
+    codeInput.addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g, '').slice(0, 6);
+      if (this.value.length === 6) this.form.querySelector('button[type="submit"]:not([name])').focus();
+    });
+  }
+})();
+</script>
+{% endblock %}
