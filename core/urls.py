@@ -19,6 +19,7 @@ from django.urls import path, include
 
 from main.views import *
 from main import views
+from main.views_extra import robots_txt, favicon_redirect
 
 from main.weather_app import weather_project_view, weather_api
 from main.stock_predictor import stock_predictor_view
@@ -61,4 +62,9 @@ urlpatterns = [
 
     path("numpy/", get_numpy, name="numpy"),
     path("matplotlib/", get_matplotlib, name="matplotlib"),
+
+    path("robots.txt", robots_txt),
+    path("favicon.ico", favicon_redirect),
 ]
+
+handler500 = "main.views_extra.server_error"

@@ -1,5 +1,7 @@
 Django
 django-allauth
+dj-database-url
+psycopg2-binary
 PyJWT
 cryptography
 gunicorn
