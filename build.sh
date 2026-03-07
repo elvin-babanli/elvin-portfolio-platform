@@ -1,14 +1,7 @@
 #!/usr/bin/env bash
-# Render build script: install deps, run migrations, collect static
+# Render build: migrate runs here so Start Command stays simple (gunicorn only)
+# Site stays up even if migrate has issues; Start never blocks on DB
 set -o errexit
-
-echo "==> Installing dependencies..."
 pip install -r requirements.txt
-
-echo "==> Running migrations..."
 python manage.py migrate --noinput
-
-echo "==> Collecting static files..."
 python manage.py collectstatic --noinput --clear
-
-echo "==> Build complete."

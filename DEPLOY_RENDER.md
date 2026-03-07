@@ -1,41 +1,45 @@
-# Deploy to Render
+# Render Deploy — Portfolio Site
 
-## ÖNEMLİ: Render Dashboard Ayarları
+## Önerilen Ayarlar
 
-### 1. Build Command
+### Build Command
 ```
-pip install -r requirements.txt && python manage.py collectstatic --noinput --clear
+pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py collectstatic --noinput
 ```
+veya `./build.sh` (build.sh varsa)
 
-### 2. Start Command (KRİTİK – migrate burada çalışır)
+### Start Command
 ```
-bash start.sh
+gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
 ```
-veya direkt:
-```
-python manage.py migrate --noinput && gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
-```
+**Önemli:** Sadece gunicorn. `start.sh` veya migrate kullanma.
 
-### 3. Environment Variables
+### Neden?
+- **migrate** Build sırasında çalışır; tablolar oluşturulur
+- **Start** sadece gunicorn başlatır; site hemen açılır
+- `start.sh` ile migrate, hata alırsa gunicorn hiç başlamaz → beyaz ekran
+
+---
+
+## Environment Variables
 
 | Key | Value |
 |-----|-------|
-| `SECRET_KEY` | Rastgele 50 karakter (örn. `python -c "import secrets; print(secrets.token_hex(25))"`) |
+| `SECRET_KEY` | Rastgele 50 karakter |
 | `DEBUG` | `False` |
 | `ALLOWED_HOSTS` | `elvin-babanli.com,www.elvin-babanli.com,.onrender.com` |
 | `CSRF_TRUSTED_ORIGINS` | `https://elvin-babanli.com,https://www.elvin-babanli.com` |
 
-### 4. PostgreSQL (Önerilen – veri kalıcı olur)
+### PostgreSQL (kalıcı veri için)
+- New → PostgreSQL
+- Web service’e bağla → `DATABASE_URL` otomatik gelir
 
-1. Render → **New** → **PostgreSQL**
-2. Database oluştur
-3. Web Service → **Environment** → **Add**
-4. `DATABASE_URL` = PostgreSQL **Internal Database URL** (Dashboard’dan kopyala)
-
-PostgreSQL olmadan SQLite kullanılır; Render’da her deploy’da veri sıfırlanır.
+---
 
 ## Sorun Giderme
 
-- **auth_user tablosu yok**: Start Command’da `migrate` çalıştığından emin olun
-- **robots.txt / favicon 404**: Son commit’in deploy edildiğini kontrol edin
-- **500 error**: Logs’da traceback’e bakın; çoğunlukla DATABASE_URL veya migrate ile ilgilidir
+| Sorun | Çözüm |
+|-------|--------|
+| Beyaz ekran / site açılmıyor | Start Command’da sadece gunicorn olmalı; migrate Build’de |
+| auth_user yok | Build Command’a `python manage.py migrate --noinput` ekle |
+| robots.txt / favicon 404 | Son commit deploy edildi mi kontrol et |
