@@ -77,7 +77,9 @@ def _send_templated(
         err_str = str(e).lower()
         if "authentication" in err_str or "535" in str(e):
             logger.error(
-                "Email SMTP auth failed. Check EMAIL_HOST_USER and EMAIL_HOST_PASSWORD. %s", e
+                "Email SMTP auth failed (535). Verify: EMAIL_HOST_USER=updates@elvin-babanli.com, "
+                "EMAIL_HOST_PASSWORD=16-char App Password from Google Account > Security > App Passwords. "
+                "2FA must be enabled. No extra spaces/newlines. Error: %s", e
             )
         elif "connection" in err_str or "timed out" in err_str:
             logger.error("Email SMTP connection failed. Check EMAIL_HOST, EMAIL_PORT. %s", e)

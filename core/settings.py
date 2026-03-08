@@ -144,13 +144,17 @@ CACHES = {
 
 # ==================== EMAIL ====================
 # B Labs: updates@elvin-babanli.com (Google Workspace)
-# Production: set EMAIL_HOST, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD via env
-# Primary: EMAIL_HOST_PASSWORD. Legacy fallback: GMAIL_APP_PASSWORD
-# Local: leave unset → console backend (prints to terminal)
-_email_backend = config("EMAIL_BACKEND", default="")
-_email_host = config("EMAIL_HOST", default="")
-_email_user = config("EMAIL_HOST_USER", default="")
-_email_pwd = config("EMAIL_HOST_PASSWORD", default="") or config("GMAIL_APP_PASSWORD", default="")
+# Production: EMAIL_HOST, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD (required)
+# Single source: EMAIL_HOST_PASSWORD only. No GMAIL_APP_PASSWORD.
+# Strip whitespace/newlines (Render env can add trailing chars).
+def _env(key, default=""):
+    v = config(key, default=default)
+    return (v or "").strip() if isinstance(v, str) else str(v).strip()
+
+_email_backend = _env("EMAIL_BACKEND")
+_email_host = _env("EMAIL_HOST")
+_email_user = _env("EMAIL_HOST_USER")
+_email_pwd = (_env("EMAIL_HOST_PASSWORD") or "").replace(" ", "")  # App Password: spaces stripped
 _use_smtp = bool(_email_host and _email_user and _email_pwd)
 
 if _email_backend:
@@ -160,16 +164,13 @@ elif _use_smtp:
 else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-EMAIL_HOST = _email_host or ""
-EMAIL_PORT = int(config("EMAIL_PORT", default="587"))
-EMAIL_USE_TLS = config("EMAIL_USE_TLS", default="True") == "True"
-EMAIL_HOST_USER = _email_user or ""
+EMAIL_HOST = _email_host
+EMAIL_PORT = int(_env("EMAIL_PORT", "587") or "587")
+EMAIL_USE_TLS = _env("EMAIL_USE_TLS", "True").lower() in ("true", "1", "yes")
+EMAIL_HOST_USER = _email_user
 EMAIL_HOST_PASSWORD = _email_pwd
-DEFAULT_FROM_EMAIL = config(
-    "DEFAULT_FROM_EMAIL",
-    default="B Labs <updates@elvin-babanli.com>",
-)
-SERVER_EMAIL = config("SERVER_EMAIL", default="updates@elvin-babanli.com")
+DEFAULT_FROM_EMAIL = _env("DEFAULT_FROM_EMAIL") or "B Labs <updates@elvin-babanli.com>"
+SERVER_EMAIL = _env("SERVER_EMAIL") or "updates@elvin-babanli.com"
 
 # ==================== LOGGING ====================
 LOGGING = {

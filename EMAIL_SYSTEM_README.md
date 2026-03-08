@@ -31,14 +31,13 @@ accounts/templates/accounts/emails/
 
 ## Environment Variables
 
-See `.env.example` and `EMAIL_SETUP.md`. Required for production delivery:
+See `.env.example` and `EMAIL_SETUP.md`. **Required for production:**
 
 - `EMAIL_HOST` = `smtp.gmail.com`
 - `EMAIL_HOST_USER` = `updates@elvin-babanli.com`
-- `EMAIL_HOST_PASSWORD` = Google Workspace app password
-- `DEFAULT_FROM_EMAIL` (optional; default: B Labs \<updates@elvin-babanli.com\>)
-- `SERVER_EMAIL` (optional; default: updates@elvin-babanli.com)
-- `EMAIL_BACKEND` (optional; auto set to SMTP when credentials present)
+- `EMAIL_HOST_PASSWORD` = Google Workspace App Password (16 chars, no spaces)
+
+Optional: `DEFAULT_FROM_EMAIL`, `SERVER_EMAIL`. **Do not use** `GMAIL_APP_PASSWORD`.
 
 ## Local Development
 

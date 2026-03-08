@@ -23,29 +23,24 @@ gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
 
 ### PostgreSQL
 
-- Create PostgreSQL instance
-- Connect to web service → `DATABASE_URL` is set automatically
+- Create PostgreSQL → connect to web service → `DATABASE_URL` auto-set
 
-### Email (B Labs)
+### Email (B Labs) — required for welcome/OTP
 
-| Key | Value | Required |
-|-----|-------|----------|
-| `EMAIL_BACKEND` | `django.core.mail.backends.smtp.EmailBackend` | No (auto when SMTP set) |
-| `EMAIL_HOST` | `smtp.gmail.com` | Yes |
-| `EMAIL_PORT` | `587` | No |
-| `EMAIL_USE_TLS` | `True` | No |
-| `EMAIL_HOST_USER` | `updates@elvin-babanli.com` | Yes |
-| `EMAIL_HOST_PASSWORD` | Google Workspace app password | Yes |
-| `DEFAULT_FROM_EMAIL` | `B Labs <updates@elvin-babanli.com>` | No |
-| `SERVER_EMAIL` | `updates@elvin-babanli.com` | No |
+| Key | Value |
+|-----|-------|
+| `EMAIL_HOST` | `smtp.gmail.com` |
+| `EMAIL_HOST_USER` | `updates@elvin-babanli.com` |
+| `EMAIL_HOST_PASSWORD` | Google Workspace App Password (16 chars, no spaces) |
+| `DEFAULT_FROM_EMAIL` | `B Labs <updates@elvin-babanli.com>` |
+| `SERVER_EMAIL` | `updates@elvin-babanli.com` |
 
-See `EMAIL_SETUP.md` for details.
+See `EMAIL_SETUP.md` for 535 troubleshooting.
 
 ## Troubleshooting
 
 | Issue | Solution |
 |-------|----------|
-| Blank page / site not loading | Use only gunicorn in Start Command; run migrate in Build |
-| auth_user table missing | Add `python manage.py migrate --noinput` to Build Command |
-| Verification code not received | Set `EMAIL_HOST`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`; see `EMAIL_SETUP.md` |
-| 500 on email send | Check logs; ensure app password is valid and 2FA is enabled |
+| 535 Username and Password not accepted | Use App Password (not account password), 2FA on, paste without spaces |
+| Verification code not received | Check `EMAIL_HOST_PASSWORD` in Render Dashboard |
+| Blank page | Start Command: gunicorn only; migrate in Build |
