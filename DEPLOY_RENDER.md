@@ -35,12 +35,13 @@ gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
 | `DEFAULT_FROM_EMAIL` | `B Labs <updates@elvin-babanli.com>` |
 | `SERVER_EMAIL` | `updates@elvin-babanli.com` |
 
-See `EMAIL_SETUP.md` for 535 troubleshooting.
+See `EMAIL_SETUP.md` for troubleshooting.
 
 ## Troubleshooting
 
 | Issue | Solution |
 |-------|----------|
-| 535 Username and Password not accepted | Use App Password (not account password), 2FA on, paste without spaces |
+| 550 Mail relay denied | Use `smtp.gmail.com` (not smtp-relay) |
+| 535 Username and Password not accepted | App Password (not account password), 2FA on, no spaces |
 | Verification code not received | Check `EMAIL_HOST_PASSWORD` in Render Dashboard |
 | Blank page | Start Command: gunicorn only; migrate in Build |

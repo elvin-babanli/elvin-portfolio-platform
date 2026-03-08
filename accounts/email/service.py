@@ -75,11 +75,15 @@ def _send_templated(
         return True
     except Exception as e:
         err_str = str(e).lower()
-        if "authentication" in err_str or "535" in str(e):
+        err_full = str(e)
+        if "authentication" in err_str or "535" in err_full:
             logger.error(
-                "Email SMTP auth failed (535). Verify: EMAIL_HOST_USER=updates@elvin-babanli.com, "
-                "EMAIL_HOST_PASSWORD=16-char App Password from Google Account > Security > App Passwords. "
-                "2FA must be enabled. No extra spaces/newlines. Error: %s", e
+                "Email SMTP auth failed (535). Verify EMAIL_HOST_USER and EMAIL_HOST_PASSWORD. Error: %s", e
+            )
+        elif "550" in err_full or "relay" in err_str:
+            logger.error(
+                "Email 550 relay denied. Use EMAIL_HOST=smtp.gmail.com (not smtp-relay). "
+                "Ensure from_email address matches EMAIL_HOST_USER. Error: %s", e
             )
         elif "connection" in err_str or "timed out" in err_str:
             logger.error("Email SMTP connection failed. Check EMAIL_HOST, EMAIL_PORT. %s", e)

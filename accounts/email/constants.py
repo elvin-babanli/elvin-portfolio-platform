@@ -1,6 +1,6 @@
 """
 Email constants. Single source of truth for brand and sender.
-All system emails use B Labs branding and updates@elvin-babanli.com.
+Envelope sender (MAIL FROM) must match EMAIL_HOST_USER to avoid 550 relay denied.
 """
 from django.conf import settings
 
@@ -8,12 +8,14 @@ from django.conf import settings
 BRAND_NAME = "B Labs"
 DOMAIN = "elvin-babanli.com"
 
-# From address - must match EMAIL_HOST_USER for SMTP auth
-# Format: "B Labs <updates@elvin-babanli.com>"
+
 def get_from_email():
-    """Get branded from_email from settings. Never use fallback personal Gmail."""
-    return getattr(
-        settings,
-        "DEFAULT_FROM_EMAIL",
-        f"{BRAND_NAME} <updates@{DOMAIN}>",
-    )
+    """
+    From address for MAIL FROM. Must exactly match EMAIL_HOST_USER (auth user)
+    to avoid 550 "Mail relay denied" from Google Workspace.
+    """
+    auth_user = getattr(settings, "EMAIL_HOST_USER", "") or ""
+    if auth_user:
+        return f"{BRAND_NAME} <{auth_user}>"
+    default = getattr(settings, "DEFAULT_FROM_EMAIL", "") or f"{BRAND_NAME} <updates@{DOMAIN}>"
+    return default

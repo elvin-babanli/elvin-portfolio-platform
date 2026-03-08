@@ -164,12 +164,17 @@ elif _use_smtp:
 else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-EMAIL_HOST = _email_host
+# Use smtp.gmail.com for authenticated submission; smtp-relay causes 550 relay denied
+EMAIL_HOST = "smtp.gmail.com" if _use_smtp else _email_host
 EMAIL_PORT = int(_env("EMAIL_PORT", "587") or "587")
 EMAIL_USE_TLS = _env("EMAIL_USE_TLS", "True").lower() in ("true", "1", "yes")
 EMAIL_HOST_USER = _email_user
 EMAIL_HOST_PASSWORD = _email_pwd
-DEFAULT_FROM_EMAIL = _env("DEFAULT_FROM_EMAIL") or "B Labs <updates@elvin-babanli.com>"
+# From header: derived from EMAIL_HOST_USER to ensure envelope sender = auth user (avoids 550 relay)
+DEFAULT_FROM_EMAIL = (
+    _env("DEFAULT_FROM_EMAIL")
+    or (f"B Labs <{_email_user}>" if _email_user else "B Labs <updates@elvin-babanli.com>")
+)
 SERVER_EMAIL = _env("SERVER_EMAIL") or "updates@elvin-babanli.com"
 
 # ==================== LOGGING ====================

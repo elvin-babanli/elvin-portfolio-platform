@@ -59,6 +59,13 @@ def login_view(request):
         next_url = request.GET.get("next") or reverse("home")
         return redirect(next_url)
 
+    # Ensure register success message shows when redirected with ?registered=1
+    if request.method == "GET" and request.GET.get("registered") == "1":
+        messages.success(
+            request,
+            "Account created successfully. Please sign in to continue.",
+        )
+
     return render(
         request,
         "accounts/login.html",
@@ -75,7 +82,6 @@ def register_view(request):
 
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, "Account created successfully. Please sign in to continue.")
         return redirect(reverse("accounts:auth_login") + "?registered=1")
 
     return render(

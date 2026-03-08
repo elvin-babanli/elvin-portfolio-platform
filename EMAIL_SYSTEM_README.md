@@ -33,11 +33,11 @@ accounts/templates/accounts/emails/
 
 See `.env.example` and `EMAIL_SETUP.md`. **Required for production:**
 
-- `EMAIL_HOST` = `smtp.gmail.com`
+- `EMAIL_HOST` = `smtp.gmail.com` (never smtp-relay — causes 550)
 - `EMAIL_HOST_USER` = `updates@elvin-babanli.com`
 - `EMAIL_HOST_PASSWORD` = Google Workspace App Password (16 chars, no spaces)
 
-Optional: `DEFAULT_FROM_EMAIL`, `SERVER_EMAIL`. **Do not use** `GMAIL_APP_PASSWORD`.
+Envelope sender (MAIL FROM) is derived from `EMAIL_HOST_USER` to avoid 550 relay denied.
 
 ## Local Development
 
