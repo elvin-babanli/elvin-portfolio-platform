@@ -23,7 +23,8 @@
 ### Build/Start Komutları (render.yaml)
 ```yaml
 buildCommand: "pip install -r requirements.txt && python manage.py migrate --noinput && python create_admin_user.py && python manage.py collectstatic --noinput"
-startCommand: "gunicorn core.wsgi:application --bind 0.0.0.0:$PORT"
+startCommand: "bash start.sh"
 ```
+`start.sh` binds to `0.0.0.0:$PORT` with gunicorn (workers 1, threads 4, timeout 120s).
 - `migrate --noinput`: Sadece yeni migration'ları uygular (safe).
 - `create_admin_user.py`: Sadece admin kullanıcı oluşturur/günceller; veri silmez.

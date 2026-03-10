@@ -112,6 +112,12 @@ The goal of this project is to create a central platform where recruiters and de
 
 ---
 
+---
+
+**Made with [Cursor](https://cursor.com)**
+
+---
+
 ## Author
 
 Elvin Babanli  
