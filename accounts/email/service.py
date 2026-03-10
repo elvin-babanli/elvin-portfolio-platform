@@ -15,13 +15,18 @@ logger = logging.getLogger(__name__)
 
 
 def _is_email_configured():
-    """Check if real SMTP is configured (not console backend)."""
+    """Check if email can be sent (SMTP, MailHog, or locmem for tests)."""
     backend = getattr(settings, "EMAIL_BACKEND", "") or ""
     if "console" in backend:
         return False
+    if "locmem" in backend.lower():
+        return True
     if "smtp" not in backend.lower():
         return False
-    host = getattr(settings, "EMAIL_HOST", "") or ""
+    host = (getattr(settings, "EMAIL_HOST", "") or "").strip()
+    # MailHog: localhost:1025, no auth
+    if host in ("localhost", "127.0.0.1") and getattr(settings, "EMAIL_PORT", 0) == 1025:
+        return True
     user = getattr(settings, "EMAIL_HOST_USER", "") or ""
     pwd = getattr(settings, "EMAIL_HOST_PASSWORD", "") or ""
     return bool(host and user and pwd)
@@ -145,4 +150,30 @@ def send_update_announcement(to_email: str, subject: str, html_body: str) -> boo
         subject=subject,
         html_template_name="accounts/emails/update.html",
         context={"content": html_body},
+    )
+
+
+def send_flight_details(to_email: str, flight_ctx: dict) -> bool:
+    """
+    Send flight summary email. Same pattern as send_register_welcome.
+    flight_ctx: dict with route_display, price_display, departure_date, etc.
+    Adds _ob_segments, _ret_segments for safe template access (outbound/return).
+    """
+    ob = flight_ctx.get("outbound") or {}
+    ret = flight_ctx.get("return_leg") or {}
+    flight_ctx = {**flight_ctx}
+    flight_ctx["ob_segments"] = ob.get("segments") or flight_ctx.get("segments") or []
+    flight_ctx["ret_segments"] = ret.get("segments") or []
+    if not _is_email_configured():
+        logger.warning(
+            "Email not configured (console backend or missing env). "
+            "Flight details would not be sent. Set USE_MAILHOG=true or EMAIL_* for SMTP."
+        )
+    subject = f"Flight details: {flight_ctx.get('route_display', 'Your trip')}"
+    return _send_templated(
+        to_emails=to_email,
+        subject=subject,
+        html_template_name="main/emails/flight_summary.html",
+        context={"flight": flight_ctx},
+        text_template_name="main/emails/flight_summary.txt",
     )
