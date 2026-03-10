@@ -3,27 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your Verification Code</title>
+  <title>Your Verification Code — {{ brand_name }}</title>
 </head>
-<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f1f5f9;color:#0f172a;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:40px 20px;">
+<body style="margin:0;padding:0;font-family:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;background:linear-gradient(145deg,#0f172a 0%,#1e293b 50%,#334155 100%);color:#f8fafc;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(145deg,#0f172a 0%,#1e293b 50%,#334155 100%);padding:48px 20px;min-height:100vh;">
     <tr>
       <td align="center">
-        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.08);overflow:hidden;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:460px;background:#ffffff;border-radius:24px;box-shadow:0 25px 50px -12px rgba(0,0,0,.4);overflow:hidden;">
+          <!-- Header -->
           <tr>
-            <td style="padding:40px 36px;">
-              <h1 style="margin:0 0 16px;font-size:1.5rem;font-weight:700;color:#0f172a;">Your Verification Code</h1>
-              <p style="margin:0 0 24px;font-size:0.95rem;color:#64748b;line-height:1.6;">We received a request for {{ purpose }}. Your 6-digit verification code is:</p>
-
-              <div style="background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-radius:12px;padding:24px;margin:16px 0 24px;text-align:center;border:1px solid #e2e8f0;">
-                <p style="margin:0;font-size:2rem;font-weight:800;letter-spacing:0.3em;color:#0f172a;">{{ code }}</p>
+            <td style="background:linear-gradient(135deg,#2563eb 0%,#3b82f6 50%,#60a5fa 100%);padding:32px 36px;text-align:center;">
+              <p style="margin:0 0 8px;font-size:2.5rem;line-height:1;">🔐</p>
+              <h1 style="margin:0;font-size:1.35rem;font-weight:800;color:#fff;letter-spacing:-0.02em;">Verification Code</h1>
+              <p style="margin:8px 0 0;font-size:0.9rem;color:rgba(255,255,255,.95);">We received a request for {{ purpose }}</p>
+            </td>
+          </tr>
+          <!-- Code box -->
+          <tr>
+            <td style="padding:36px 36px 24px;">
+              <p style="margin:0 0 16px;font-size:0.95rem;color:#64748b;line-height:1.6;">Your 6-digit verification code is:</p>
+              <div style="background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%);border-radius:16px;padding:28px;text-align:center;border:2px solid #86efac;box-shadow:0 4px 20px rgba(34,197,94,.15);">
+                <p style="margin:0;font-size:2.25rem;font-weight:800;letter-spacing:0.4em;color:#1e40af;font-family:'Courier New',monospace;">{{ code }}</p>
               </div>
-              <p style="margin:0 0 24px;font-size:0.9rem;color:#475569;line-height:1.6;">This code is valid for <strong>1 minute</strong> only. Do not share it with anyone.</p>
+              <p style="margin:20px 0 0;font-size:0.85rem;color:#64748b;line-height:1.6;">⏱️ This code expires in <strong style="color:#dc2626;">1 minute</strong>. Do not share it with anyone.</p>
 
-              <p style="margin:0 0 16px;font-size:0.9rem;color:#64748b;line-height:1.6;">If you did not make this request, you can safely ignore this email.</p>
+              <div style="background:#fef2f2;border-radius:12px;padding:16px 20px;margin:24px 0 0;border-left:4px solid #ef4444;">
+                <p style="margin:0;font-size:0.85rem;color:#991b1b;line-height:1.5;">⚠️ We will never ask for this code by phone or email. If someone requests it, it's a scam.</p>
+              </div>
 
-              <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;">
-              <p style="margin:0;font-size:0.9rem;color:#64748b;">Best regards,<br><strong>{{ brand_name }} Team</strong><br>elvin-babanli.com</p>
+              <p style="margin:24px 0 0;font-size:0.9rem;color:#94a3b8;line-height:1.6;">If you didn't request this, you can safely ignore this email. Your account remains secure.</p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 36px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;">
+              <p style="margin:0;font-size:0.85rem;color:#94a3b8;">Best regards,<br><strong style="color:#0f172a;">{{ brand_name }} Team</strong></p>
+              <p style="margin:8px 0 0;font-size:0.75rem;color:#94a3b8;">elvin-babanli.com</p>
             </td>
           </tr>
         </table>
