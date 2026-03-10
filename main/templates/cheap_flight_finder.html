@@ -1,194 +1,1265 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Cheap Flight Finder — Elvin's CodeBase{% endblock %}
 
+{% block container_class %}container-fluid px-3 px-md-4 px-xl-5{% endblock %}
+
 {% block extra_head %}
 <style>
-  .hero {
-    background: linear-gradient(135deg,#eaf2ff,#f6fff4);
-    border-radius: 1.1rem;
-    padding: 1.4rem 1.2rem;
+  /* CFF — ekrana sağdan sola fit, pencere içi pencere hissini kaldır */
+  main .container-fluid { max-width: 100%; }
+  body:has(.cff-root) main { background: #f8f8ff; }
+  /* ========== CFF DESIGN SYSTEM ========== */
+  .cff-root {
+    --cff-primary: #6059f6;
+    --cff-primary-dark: #201aa3;
+    --cff-bg: #f8f8ff;
+    --cff-bg-alt: #f0f0fa;
+    --cff-card: #fff;
+    --cff-border: rgba(96, 89, 246, .12);
+    --cff-text: #2a2a2a;
+    --cff-muted: #555;
+    --cff-accent: #6059f6;
+    --cff-accent-hover: #201aa3;
+    --cff-accent-soft: rgba(96, 89, 246, .12);
+    --cff-success: #059669;
+    --cff-error: #dc2626;
+    --cff-warning: #d97706;
+    --cff-radius: 12px;
+    --cff-radius-lg: 20px;
+    --cff-shadow: 0 4px 20px rgba(96, 89, 246, .08), 0 2px 8px rgba(0,0,0,.04);
+    --cff-shadow-lg: 0 20px 50px rgba(96, 89, 246, .12), 0 8px 24px rgba(0,0,0,.06);
+    font-family: 'DM Sans', 'Roboto', ui-sans-serif, system-ui, sans-serif;
+    background: var(--cff-bg);
+    padding: 2rem;
+    border-radius: var(--cff-radius-lg);
   }
-  .gradient-text{
-    background-image: linear-gradient(135deg,#0d6efd,#22c55e);
-    background-size: 100%; background-repeat: repeat;
-    color: transparent; -webkit-background-clip: text; background-clip: text;
+
+  /* ========== HERO — Reference-Level Main Page ========== */
+  .cff-hero {
+    background: linear-gradient(135deg, #fff 0%, #f8f8ff 25%, #f0f0fa 60%, #e8e8f8 100%);
+    border-radius: var(--cff-radius-lg);
+    padding: 3rem 2.5rem;
+    margin-bottom: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--cff-shadow-lg);
+    border: 1px solid rgba(255,255,255,.9);
   }
-  .pill{background:#eef2ff;border-radius:999px;padding:.2rem .6rem;font-size:.8rem}
-  .code-window{border-radius:.9rem;overflow:hidden;background:#020617;color:#e5e7eb;box-shadow:0 16px 35px rgba(2,6,23,.35)}
-  .code-header{display:flex;align-items:center;justify-content:space-between;padding:.45rem .9rem;background:linear-gradient(135deg,#111827,#0f172a);font-size:.78rem;color:#9ca3af}
-  .dots{display:inline-flex;gap:.3rem}.dot{width:9px;height:9px;border-radius:999px}.dot.red{background:#f87171}.dot.yellow{background:#facc15}.dot.green{background:#4ade80}
-  .code-body{padding:.85rem 1rem}
-  .code-body p, .code-body li{color:#cbd5e1}
+  .cff-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 50%; max-width: 520px;
+    height: 100%;
+    background: var(--cff-hero-img, linear-gradient(135deg, rgba(96,89,246,.06) 0%, rgba(96,89,246,.03) 50%, transparent 100%));
+    background-size: cover;
+    background-position: top right;
+  }
+  .cff-hero .cff-magic-ball-1 {
+    position: absolute; width: 50px; height: 50px;
+    border-radius: 50%; border: 10px solid var(--cff-primary);
+    opacity: .4; bottom: 2rem; left: 2rem; z-index: 0;
+  }
+  .cff-hero .cff-magic-ball-2 {
+    position: absolute; width: 80px; height: 80px;
+    border-radius: 50%; background: #ebebff;
+    opacity: .6; top: 2rem; right: 25%; z-index: 0;
+  }
+  .cff-hero-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 3rem; position: relative; z-index: 1;
+  }
+  .cff-hero-text { flex: 1; min-width: 0; }
+  .cff-hero h1 {
+    font-size: 2.5rem; font-weight: 800;
+    color: var(--cff-primary);
+    margin: 0 0 1rem;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    line-height: 1.2;
+  }
+  .cff-hero-slogan {
+    font-size: 1.15rem; color: var(--cff-text);
+    margin: 0 0 1.5rem;
+    line-height: 1.7;
+    max-width: 540px;
+    font-weight: 500;
+  }
+  .cff-hero-info { display: flex; flex-wrap: wrap; gap: 1.25rem; }
+  .cff-hero-info-item {
+    display: flex; align-items: center; gap: .6rem;
+    font-size: .95rem; font-weight: 600; color: var(--cff-text);
+    padding: .5rem .85rem;
+    background: rgba(255,255,255,.7);
+    border-radius: 12px;
+    border: 1px solid rgba(96,89,246,.15);
+    box-shadow: 0 2px 8px rgba(96,89,246,.06);
+  }
+  .cff-hero-info-item .cff-icon { width: 22px; height: 22px; }
+  .cff-hero-visual-wrap {
+    flex-shrink: 0;
+    width: 42%;
+    min-width: 280px;
+    max-width: 420px;
+    aspect-ratio: 4/3;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(96,89,246,.15);
+    position: relative;
+  }
+  .cff-hero-visual {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #e8e8f8 0%, #ddddef 50%, #e0e0f0 100%);
+    background-size: cover;
+    background-position: center;
+  }
+  .cff-hero-visual.has-img {
+    background-image: url('{% static "main/img/cheap-flight-finder/hero-plane.svg" %}'), linear-gradient(135deg, #e8e8f8 0%, #ddddef 100%);
+  }
+  @media (max-width: 768px) {
+    .cff-hero { padding: 2rem 1.5rem; }
+    .cff-hero-inner { flex-direction: column; gap: 2rem; }
+    .cff-hero h1 { font-size: 1.85rem; }
+    .cff-hero-slogan { font-size: 1rem; max-width: 100%; }
+    .cff-hero-info-item { font-size: .875rem; padding: .4rem .65rem; }
+    .cff-hero .cff-magic-ball-1, .cff-hero .cff-magic-ball-2 { display: none; }
+    .cff-hero-visual-wrap { display: none; }
+  }
+
+  /* ========== SEARCH SHELL — Reference search-wrapper ========== */
+  /* Form ve sonuçlar — sağdan soldan boşluk, merkezde */
+  .cff-centered { max-width: 1180px; margin-left: auto; margin-right: auto; padding: 0 0.25rem; }
+  .cff-form-card {
+    background: var(--cff-bg);
+    border-radius: var(--cff-radius-lg);
+    box-shadow: 0 12px 40px rgba(96,89,246,.08);
+    border: 1px solid var(--cff-border);
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+    position: relative;
+  }
+  .cff-form-card:hover { background: #fff; transition: background .3s; }
+
+  .cff-input-wrap { position: relative; }
+  .cff-input { width: 100%; padding: .6rem .75rem; border: 1px solid var(--cff-border); border-radius: 8px; font-size: .9rem; }
+  .cff-input:focus { outline: none; border-color: var(--cff-primary); box-shadow: 0 0 0 3px var(--cff-accent-soft); }
+  .cff-input.is-invalid { border-color: var(--cff-error); }
+  .cff-label { display: flex; align-items: center; gap: .35rem; font-size: .75rem; font-weight: 500; color: var(--cff-muted); margin-bottom: .25rem; }
+  .cff-icon { width: 16px; height: 16px; flex-shrink: 0; display: inline-flex; }
+  .cff-icon img { width: 100%; height: 100%; object-fit: contain; opacity: .85; }
+
+  .cff-autocomplete-dropdown {
+    position: absolute; left: 0; right: 0; top: 100%; margin-top: 2px;
+    background: var(--cff-card); border: 1px solid var(--cff-border);
+    border-radius: 8px; box-shadow: var(--cff-shadow-lg); z-index: 100;
+    max-height: 220px; overflow-y: auto;
+    max-width: calc(100vw - 2rem); width: 100%;
+  }
+  .cff-autocomplete-item {
+    padding: .6rem .75rem; cursor: pointer; font-size: .875rem;
+    border-bottom: 1px solid var(--cff-border); transition: background .15s;
+  }
+  .cff-autocomplete-item:last-child { border-bottom: none; }
+  .cff-autocomplete-item:hover, .cff-autocomplete-item.is-focused { background: #f1f5f9; }
+  .cff-autocomplete-item .cff-item-iata { font-weight: 600; color: var(--cff-primary); }
+  .cff-autocomplete-item .cff-item-meta { font-size: .75rem; color: var(--cff-muted); }
+
+  .cff-btn { padding: 10px 28px; border-radius: 30px; font-weight: 600; font-size: .95rem; border: none; cursor: pointer; transition: all .3s; text-transform: capitalize; }
+  .cff-btn-primary { background: var(--cff-primary); color: #fff; box-shadow: 0 6px 20px rgba(96,89,246,.25); }
+  .cff-btn-primary:hover { background: var(--cff-primary-dark); color: #fff; transform: translateY(-2px); box-shadow: 0 10px 28px rgba(96,89,246,.35); }
+  .cff-btn-primary:disabled { opacity: .6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .cff-filter-bar {
+    display: flex; flex-direction: column; align-items: stretch; gap: 0;
+    padding: 0; margin-bottom: 1.5rem; border-bottom: none;
+  }
+  .cff-filter-toggle {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .85rem 1rem; background: var(--cff-card); border: 2px solid var(--cff-border);
+    border-radius: 10px; font-size: .95rem; font-weight: 600; color: var(--cff-text);
+    cursor: pointer;
+  }
+    .cff-filter-toggle .cff-icon { width: 18px; height: 18px; }
+    .cff-filter-toggle span:last-child { display: inline-block; transition: transform .25s; font-size: .7rem; }
+    .cff-filter-content { display: none; padding: 1rem; background: var(--cff-bg); border-radius: 10px; border: 2px solid var(--cff-border); }
+    .cff-filter-bar.is-open .cff-filter-content { display: flex; flex-wrap: wrap; gap: .75rem 1rem; align-items: center; }
+    .cff-filter-bar.is-open .cff-filter-toggle { margin-bottom: 0; border-radius: 10px 10px 0 0; border-bottom-color: transparent; }
+    .cff-filter-bar.is-open .cff-filter-toggle span:last-child { transform: rotate(180deg); }
+  .cff-filter-content .cff-filter-group { flex-wrap: wrap; gap: .3rem; }
+  .cff-filter-content .cff-filter-label { margin-bottom: .2rem; }
+  @media (max-width: 768px) {
+    .cff-filter-group { flex-wrap: wrap; gap: .3rem; }
+    .cff-filter-label { margin-bottom: .2rem; }
+  }
+  .cff-filter-group { display: flex; align-items: center; gap: .3rem; flex-wrap: wrap; }
+  .cff-filter-label { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--cff-muted); margin-right: .35rem; display: inline-flex; align-items: center; gap: .25rem; }
+  .cff-filter-label .cff-icon { width: 14px; height: 14px; }
+  .cff-filter-btn {
+    padding: .3rem .55rem; font-size: .8rem; border: 1px solid var(--cff-border);
+    background: var(--cff-card); border-radius: 8px; cursor: pointer; transition: all .2s;
+  }
+  .cff-filter-btn:hover { border-color: var(--cff-primary); color: var(--cff-primary); background: var(--cff-accent-soft); }
+  .cff-filter-btn.is-active { background: var(--cff-primary); color: #fff; border-color: var(--cff-primary); }
+
+  .cff-results-section { margin-bottom: 2.5rem; }
+  .cff-results-grid { display: block; }
+  .cff-section-intro { text-align: center; max-width: 560px; margin: 0 auto 2rem; }
+  .cff-section-intro-img { width: 44px; height: 44px; margin: 0 auto .75rem; display: block; opacity: .8; }
+  .cff-section-intro h2 { font-size: 1.35rem; font-weight: 700; color: var(--cff-text); margin: 0 0 .35rem; }
+  .cff-section-intro p { font-size: .95rem; color: var(--cff-muted); margin: 0; }
+
+  .cff-flight-card {
+    background: var(--cff-card); border-radius: var(--cff-radius); box-shadow: 0 4px 16px rgba(0,0,0,.06);
+    border: 1px solid var(--cff-border); padding: 1.25rem 1.5rem; margin-bottom: .875rem;
+    cursor: pointer; transition: all .22s ease;
+  }
+  .cff-flight-card:hover { border-color: var(--cff-primary); box-shadow: 0 12px 32px rgba(96,89,246,.12); }
+  .cff-flight-card.is-selected { border-color: var(--cff-primary); box-shadow: 0 0 0 2px var(--cff-accent-soft); }
+  .cff-flight-card .cff-card-price { font-size: 1.3rem; font-weight: 700; color: var(--cff-text); }
+  .cff-flight-card .cff-card-route { font-size: .95rem; font-weight: 600; color: var(--cff-text); }
+  .cff-flight-card .cff-card-meta { font-size: .8rem; color: var(--cff-muted); margin-top: .3rem; }
+  .cff-badges { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .6rem; }
+  .cff-badge {
+    padding: .25rem .55rem; font-size: .7rem; font-weight: 600; border-radius: 8px;
+    text-transform: uppercase; letter-spacing: .035em;
+  }
+  .cff-badge-cheapest { background: rgba(5,150,105,.12); color: var(--cff-success); }
+  .cff-badge-shortest { background: var(--cff-accent-soft); color: var(--cff-primary); }
+  .cff-badge-best_value { background: rgba(217,119,6,.12); color: var(--cff-warning); }
+
+  /* Detail modal — Pencere içinde pencere */
+  .cff-detail-modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 3100;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1rem; opacity: 0; visibility: hidden; transition: opacity .28s, visibility .28s;
+    backdrop-filter: blur(4px);
+  }
+  .cff-detail-modal-backdrop.is-visible { opacity: 1; visibility: visible; }
+  .cff-detail-modal {
+    background: #fff; border-radius: 12px; max-width: 560px; width: 100%;
+    max-height: 90vh; overflow: hidden; transform: scale(.96); transition: transform .28s ease;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 4px 6px rgba(0,0,0,.05), 0 24px 64px rgba(0,0,0,.18);
+    display: flex; flex-direction: column;
+  }
+  .cff-detail-modal-backdrop.is-visible .cff-detail-modal { transform: scale(1); }
+  .cff-detail-modal.has-city-guide { max-width: 720px; }
+  .cff-detail-modal-header {
+    padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,.2);
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--cff-primary); flex-shrink: 0;
+  }
+  .cff-detail-modal-header-title { font-size: .9rem; font-weight: 600; color: #000000; }
+  .cff-detail-modal-header .cff-detail-modal-close { color: rgba(0, 0, 0, 0.9); }
+  .cff-detail-modal-header .cff-detail-modal-close:hover { color: #fff; }
+  .cff-detail-modal-scroll {
+    flex: 1; min-height: 0; overflow-y: auto;
+  }
+  .cff-detail-modal-body { padding: 1.75rem 2rem; background: #fff; flex-shrink: 0; }
+  .cff-detail-modal-close { background: none; border: none; font-size: 1.6rem; color: var(--cff-muted); cursor: pointer; padding: 0 .35rem; line-height: 1; transition: color .2s; }
+  .cff-detail-modal-close:hover { color: var(--cff-text); }
+  .cff-detail-modal .cff-detail-route { font-size: 1.25rem; font-weight: 800; color: var(--cff-text); margin-bottom: .5rem; letter-spacing: -0.02em; line-height: 1.35; }
+  .cff-detail-modal .cff-detail-price { font-size: 2rem; font-weight: 800; color: var(--cff-primary); margin: 1rem 0 1.25rem; letter-spacing: -0.03em; }
+  .cff-detail-modal .cff-detail-timeline { margin: 1.5rem 0; padding: 1rem 0 1rem 1.5rem; border-left: 4px solid var(--cff-primary); background: linear-gradient(to right, var(--cff-accent-soft) 0%, transparent 100%); border-radius: 0 8px 8px 0; }
+  .cff-detail-modal .cff-detail-timeline-item { margin-bottom: .6rem; font-size: .9rem; color: var(--cff-text); line-height: 1.5; }
+  .cff-detail-modal .cff-detail-timeline-item:last-child { margin-bottom: 0; }
+  .cff-detail-modal .cff-detail-note { font-size: .8rem; color: var(--cff-muted); margin-top: 1.25rem; }
+  .cff-detail-modal .cff-cta-row { display: flex; gap: .75rem; margin-top: 1.75rem; flex-wrap: wrap; }
+  .cff-detail-modal .cff-cta-btn { flex: 1; min-width: 140px; padding: .85rem 1.4rem; font-size: .95rem; font-weight: 700; border: 2px solid #6059f6; background: #6059f6; color: #fff; border-radius: 12px; cursor: pointer; transition: all .25s; box-shadow: 0 4px 16px rgba(96,89,246,.3); }
+  .cff-detail-modal .cff-cta-btn:hover { background: #201aa3; color: #fff; border-color: #201aa3; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(96,89,246,.4); }
+  .cff-detail-modal .cff-cta-btn:active { transform: translateY(0); }
+  @media (max-width: 768px) {
+    .cff-detail-modal { max-height: 95vh; margin: 0; border-radius: 18px 18px 0 0; }
+  }
+
+  .cff-detail-panel {
+    background: var(--cff-card); border-radius: var(--cff-radius); box-shadow: var(--cff-shadow);
+    border: 1px solid var(--cff-border); padding: 1.25rem;
+    position: sticky; top: 1rem;
+    transition: opacity .25s ease;
+  }
+  .cff-detail-panel.is-empty { display: flex; align-items: center; justify-content: center; min-height: 200px; color: var(--cff-muted); font-size: .9rem; }
+  .cff-detail-panel .cff-detail-route { font-size: 1rem; font-weight: 600; margin-bottom: .5rem; }
+  .cff-detail-panel .cff-detail-price { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
+  .cff-detail-timeline { margin: 1rem 0; padding-left: 1rem; border-left: 2px solid var(--cff-border); }
+  .cff-detail-timeline-item { margin-bottom: .75rem; font-size: .875rem; }
+  .cff-detail-note { font-size: .75rem; color: var(--cff-muted); margin-top: 1rem; }
+  .cff-cta-row { display: flex; gap: .5rem; margin-top: 1rem; flex-wrap: wrap; }
+  .cff-cta-btn {
+    flex: 1; min-width: 120px; padding: .5rem .75rem; font-size: .85rem;
+    border: 1px solid var(--cff-border); background: #f8fafc; border-radius: 8px;
+    color: var(--cff-muted); cursor: not-allowed;
+  }
+
+  .cff-loading-overlay {
+    position: fixed; inset: 0; background: rgba(248,248,255,.96); z-index: 2000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s;
+    backdrop-filter: blur(6px);
+  }
+  .cff-loading-overlay.is-visible { opacity: 1; visibility: visible; }
+  .cff-loading-status { font-size: 1.05rem; font-weight: 600; color: var(--cff-primary); margin-top: 1.75rem; }
+  /* Tarama animasyonu — search scanning */
+  .cff-loading-scan {
+    width: 220px; height: 72px; position: relative;
+    border: 2px solid rgba(96,89,246,.25);
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 8px 40px rgba(96,89,246,.15), inset 0 0 0 1px rgba(96,89,246,.06);
+    overflow: hidden;
+  }
+  .cff-loading-scan::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%; width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(96,89,246,.35), transparent);
+    animation: cff-scan-sweep 2s ease-in-out infinite;
+  }
+  @keyframes cff-scan-sweep {
+    0% { left: -50%; }
+    100% { left: 100%; }
+  }
+  .cff-skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: cff-skeleton 1.2s ease-in-out infinite; border-radius: 8px; }
+  @keyframes cff-skeleton { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  .cff-skeleton-card { height: 100px; margin-bottom: .75rem; }
+
+  .cff-city-guide-section { padding: 1.75rem !important; }
+  .cff-city-guide-section .cff-ai-section-title { margin-bottom: 1.5rem; }
+  .cff-empty, .cff-error-state {
+    text-align: center; padding: 3rem 2rem; border-radius: var(--cff-radius-lg);
+    background: var(--cff-bg); border: 2px dashed var(--cff-border); box-shadow: var(--cff-shadow);
+  }
+  .cff-empty-title, .cff-error-title { font-size: 1rem; font-weight: 600; color: var(--cff-text); margin-bottom: .35rem; }
+  .cff-empty-desc, .cff-error-desc { font-size: .875rem; color: var(--cff-muted); }
+
+  .cff-trip-toggle { display: flex; border: 2px solid var(--cff-border); border-radius: 24px; overflow: hidden; }
+  .cff-trip-toggle button { flex: 1; padding: .35rem .55rem; font-size: .78rem; font-weight: 600; border: none; background: transparent; cursor: pointer; transition: all .25s; }
+  .cff-trip-toggle button.is-active { background: var(--cff-primary); color: #fff; }
+  .cff-trip-toggle button:not(.is-active):hover { background: var(--cff-accent-soft); color: var(--cff-primary); }
+  @media (max-width: 768px) {
+    .cff-trip-toggle button { padding: .3rem .45rem; font-size: .7rem; }
+  }
+
+
+  /* Modals — Email (pencere içinde pencere) */
+  .cff-modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 3000;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1rem; opacity: 0; visibility: hidden; transition: opacity .25s, visibility .25s;
+    backdrop-filter: blur(4px);
+  }
+  .cff-modal-backdrop.is-visible { opacity: 1; visibility: visible; }
+  .cff-modal {
+    background: var(--cff-card); border-radius: 12px;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 4px 6px rgba(0,0,0,.05), 0 24px 64px rgba(0,0,0,.18);
+    max-width: 420px; width: 100%; padding: 2rem; padding-top: 2.5rem; transform: scale(.96); transition: transform .25s;
+  }
+  .cff-modal-backdrop.is-visible .cff-modal { transform: scale(1); }
+  .cff-modal-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--cff-text); }
+  .cff-modal .cff-label { margin-top: 1rem; margin-bottom: .35rem; }
+  .cff-modal .cff-input { padding: .75rem 1rem; font-size: 1rem; }
+  .cff-modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; cursor: pointer; font-size: 1.4rem; color: var(--cff-muted); line-height: 1; padding: .25rem; }
+  .cff-modal-close:hover { color: var(--cff-text); }
+  .cff-modal-email-actions { display: flex; gap: .75rem; margin-top: 1.5rem; flex-wrap: wrap; }
+  .cff-modal-email-actions .cff-btn-primary { flex: 1; min-width: 120px; padding: .85rem 1.25rem; font-size: 1rem; background: #6059f6; border: 2px solid #6059f6; color: #fff; }
+  .cff-modal-email-actions .cff-btn-primary:hover { background: #201aa3; border-color: #201aa3; }
+  .cff-modal-email-actions .cff-btn:not(.cff-btn-primary) { padding: .85rem 1.25rem; }
+
+  /* AI / City Guide — Premium cards (reference-adapted) */
+  .cff-tabs { display: flex; gap: .5rem; margin-bottom: 1rem; border-bottom: 1px solid var(--cff-border); }
+  .cff-tab { padding: .5rem 1rem; font-size: .9rem; background: none; border: none; cursor: pointer; color: var(--cff-muted); border-bottom: 2px solid transparent; transition: color .2s; }
+  .cff-tab:hover { color: var(--cff-text); }
+  .cff-tab.is-active { color: var(--cff-primary); font-weight: 600; border-bottom-color: var(--cff-primary); }
+  .cff-ai-section-title { font-size: 1.15rem; font-weight: 800; margin-bottom: 1.25rem; color: var(--cff-primary); display: flex; align-items: center; gap: .6rem; }
+  .cff-ai-section { padding: 1.25rem 0; }
+  .cff-ai-cards { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+  .cff-ai-card {
+    background: var(--cff-card); border-radius: 16px; padding: 1.25rem 1.5rem; border: 1px solid var(--cff-border);
+    overflow: hidden; transition: all .3s ease; box-shadow: 0 6px 20px rgba(0,0,0,.06);
+    margin-bottom: 1.25rem;
+  }
+  .cff-ai-card:last-child { margin-bottom: 0; }
+  .cff-ai-card:hover { box-shadow: 0 12px 36px rgba(96,89,246,.1); border-color: rgba(96,89,246,.25); background: #fff; }
+  .cff-ai-card-with-img { padding: 0; display: flex; flex-direction: column; position: relative; }
+  .cff-ai-card-img {
+    height: 140px; min-height: 140px; position: relative; overflow: hidden;
+    background: linear-gradient(135deg, #e8e8f8 0%, #ddddef 50%, #e0e0f0 100%);
+    background-size: cover; background-position: center;
+  }
+  .cff-ai-card-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(42,42,42,.7) 0%, rgba(42,42,42,.2) 40%, transparent 70%);
+    opacity: 1; transition: opacity .3s; pointer-events: none;
+  }
+  .cff-ai-card-with-img:hover .cff-ai-card-overlay { opacity: 1; background: linear-gradient(to top, rgba(42,42,42,.85) 0%, transparent 60%); }
+  .cff-ai-card-with-img .cff-ai-card-body { padding: 1.25rem 1.5rem; }
+  .cff-ai-card h4 { font-size: .8rem; font-weight: 800; margin: 0 0 .5rem; color: var(--cff-text); text-transform: uppercase; letter-spacing: .05em; display: flex; align-items: center; gap: .5rem; }
+  .cff-ai-card-icon { width: 20px; height: 20px; flex-shrink: 0; display: inline-flex; }
+  .cff-ai-card-icon img { width: 100%; height: 100%; object-fit: contain; opacity: .9; }
+  .cff-ai-card p { font-size: .9rem; color: var(--cff-text); margin: 0; line-height: 1.6; }
+  .cff-ai-card a {
+    display: inline-flex; align-items: center; gap: .35rem;
+    margin-top: .75rem; font-size: .85rem; font-weight: 700;
+    color: var(--cff-primary); text-decoration: none;
+    padding: .35rem 0; transition: all .2s;
+  }
+  .cff-ai-card a:hover { text-decoration: underline; color: var(--cff-primary-dark); }
+
+  /* Slider carousel — tek kart, < > butonlar */
+  .cff-carousel-section { margin-bottom: 2rem; }
+  .cff-carousel-section:last-child { margin-bottom: 0; }
+  .cff-carousel-title { font-size: .95rem; font-weight: 700; margin-bottom: 1rem; color: var(--cff-text); display: flex; align-items: center; gap: .5rem; }
+  .cff-carousel-wrap {
+    display: flex; align-items: center; gap: 0.75rem;
+    position: relative;
+  }
+  .cff-carousel-btn {
+    flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%;
+    border: 2px solid var(--cff-primary); background: #fff; color: var(--cff-primary);
+    font-size: 1.25rem; font-weight: 700; cursor: pointer; transition: all .25s;
+    display: flex; align-items: center; justify-content: center; line-height: 1; padding: 0;
+  }
+  .cff-carousel-btn:hover { background: var(--cff-primary); color: #fff; }
+  .cff-carousel-btn:disabled { opacity: .4; cursor: not-allowed; border-color: var(--cff-muted); color: var(--cff-muted); }
+  .cff-carousel-btn:disabled:hover { background: #fff; color: var(--cff-muted); }
+  .cff-carousel { flex: 1; min-width: 0; overflow: hidden; }
+  .cff-carousel-track { display: flex; transition: transform .3s ease; }
+  .cff-place-card {
+    flex: 0 0 100%; width: 100%; min-width: 0;
+    background: var(--cff-card); border-radius: 18px; overflow: hidden; border: 1px solid var(--cff-border);
+    box-shadow: 0 6px 24px rgba(0,0,0,.08); transition: all .25s;
+    text-decoration: none; color: inherit; display: block;
+  }
+  .cff-place-card:hover { box-shadow: 0 10px 32px rgba(96,89,246,.15); border-color: rgba(96,89,246,.25); }
+  .cff-place-card-img {
+    height: 220px; background: linear-gradient(135deg, #e8e8f8 0%, #ddddef 100%);
+    background-size: cover; background-position: center;
+  }
+  .cff-place-card-body { padding: 1.5rem 1.75rem; }
+  .cff-place-card-name { font-size: 1.2rem; font-weight: 800; color: var(--cff-text); margin-bottom: .6rem; line-height: 1.35; }
+  .cff-place-card-meta { font-size: .95rem; color: var(--cff-muted); display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: .5rem; }
+  .cff-place-card-address { font-size: .9rem; color: var(--cff-muted); line-height: 1.5; margin-bottom: .6rem; }
+  .cff-place-card-rating { color: #f59e0b; font-weight: 700; }
+  .cff-place-card-price { color: var(--cff-success); font-weight: 700; }
+  .cff-place-card-link { margin-top: .5rem; font-size: .95rem; font-weight: 700; color: var(--cff-primary); }
+  .cff-place-card-link:hover { text-decoration: underline; }
+  .cff-city-guide-section .cff-carousel-wrap { max-width: 100%; }
+  .cff-ai-loading { text-align: center; padding: 2.5rem; color: var(--cff-muted); }
+  .cff-ai-error { color: var(--cff-error); font-size: .9rem; }
+  .cff-cta-btn.is-enabled { cursor: pointer; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="row g-4 align-items-start">
+<div class="cff-root" id="cffApp" data-user-auth="{{ user_is_authenticated|yesno:'1,0' }}" data-login-url="{{ login_url|default:'/auth/login/' }}" data-next-url="{{ next_url|default:'/cheap-flight-finder/' }}" data-static-img="{% static 'main/img/cheap-flight-finder/' %}" data-static-icons="{% static 'main/icons/cheap-flight-finder/' %}">
 
-  <!-- LEFT: UI -->
-  <div class="col-lg-7">
-    <div class="hero mb-3 shadow-sm">
-      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-        <div>
-          <div class="text-uppercase text-muted" style="letter-spacing:.08em;font-size:.8rem;">Projects / Cheap Flight Finder</div>
-          <h1 class="h3 mb-2"><span class="gradient-text">Cheap Flight Finder</span> (Amadeus Test API)</h1>
-          <p class="mb-0 text-muted">Search flight offers by origin, destination, and date. We’ll pick the cheapest option and list its segments with times.</p>
+  <div class="cff-hero magic-ball">
+    <div class="cff-magic-ball-1"></div>
+    <div class="cff-magic-ball-2"></div>
+    <div class="cff-hero-inner">
+      <div class="cff-hero-text">
+        <h1>Find Your Next Flight</h1>
+        <p class="cff-hero-slogan">Search, compare, and book the best fares. Secure, transparent pricing from trusted providers. Your journey starts here.</p>
+        <div class="cff-hero-info">
+          <span class="cff-hero-info-item"><span class="cff-icon"><img src="{% static 'main/icons/cheap-flight-finder/icon-origin.svg' %}" alt="" aria-hidden="true"></span>Best prices guaranteed</span>
+          <span class="cff-hero-info-item"><span class="cff-icon"><img src="{% static 'main/icons/cheap-flight-finder/icon-destination.svg' %}" alt="" aria-hidden="true"></span>City guide included</span>
+          <span class="cff-hero-info-item"><span class="cff-icon"><img src="{% static 'main/icons/cheap-flight-finder/icon-calendar.svg' %}" alt="" aria-hidden="true"></span>Flexible dates</span>
         </div>
-        <div class="text-end">
-          <span class="pill">API: Amadeus (test)</span>
-          <span class="pill ms-1">Tech: Python, Django, requests</span>
-        </div>
+      </div>
+      <div class="cff-hero-visual-wrap">
+        <div class="cff-hero-visual has-img" role="img" aria-label="Travel"></div>
       </div>
     </div>
-
-    <!-- Form -->
-    <div class="card border-0 shadow-sm" style="border-radius:1rem;">
-      <div class="card-body">
-        <form method="get" class="row g-2 align-items-end">
-          <div class="col-md-3">
-            <label class="form-label mb-1">Origin</label>
-            <input type="text" name="origin" class="form-control" placeholder="WAW" value="{{ origin }}">
-          </div>
-          <div class="col-md-3">
-            <label class="form-label mb-1">Destination</label>
-            <input type="text" name="destination" class="form-control" placeholder="BCN" value="{{ destination }}">
-          </div>
-          <div class="col-md-3">
-            <label class="form-label mb-1">Date</label>
-            <input type="date" name="depart_date" class="form-control" value="{{ depart_date }}">
-          </div>
-          <div class="col-md-3">
-            <label class="form-label mb-1">Currency</label>
-            <input type="text" name="currency" class="form-control" placeholder="USD" value="{{ currency|default:'USD' }}">
-          </div>
-          <div class="col-12">
-            <button class="btn btn-primary mt-2" type="submit">🔎 Search Cheapest</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Errors -->
-    {% if error %}
-      <div class="alert alert-danger border-0 shadow-sm mt-3">{{ error }}</div>
-    {% endif %}
-
-    <!-- Result -->
-    {% if result %}
-      <div class="card border-0 shadow-sm mt-3" style="border-radius:1rem;">
-        <div class="card-body">
-          <div class="d-flex align-items-center">
-            <div style="font-size:2rem;" class="me-3">✈️</div>
-            <div>
-              <div class="fw-semibold">Cheapest offer</div>
-              <div class="fs-5">{{ result.price }} {{ result.currency }}</div>
-            </div>
-          </div>
-
-          {% if result.segments %}
-            <hr>
-            <div class="fw-semibold mb-2">Segments</div>
-            <div class="table-responsive">
-              <table class="table table-sm align-middle mb-0">
-                <thead>
-                  <tr>
-                    <th>Carrier</th>
-                    <th>Route</th>
-                    <th class="text-end">Departure</th>
-                    <th class="text-end">Arrival</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for seg in result.segments %}
-                    <tr>
-                      <td>{{ seg.carrier }}</td>
-                      <td>{{ seg.route }}</td>
-                      <td class="text-end">{{ seg.dep_time }}</td>
-                      <td class="text-end">{{ seg.arr_time }}</td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          {% endif %}
-        </div>
-      </div>
-    {% endif %}
-
-    {% if sample_rows and not result %}
-      <div class="card border-0 shadow-sm mt-3" style="border-radius:1rem;">
-        <div class="card-body">
-          <div class="fw-semibold mb-2">Sample segments</div>
-          <div class="table-responsive">
-            <table class="table table-sm align-middle mb-0">
-              <thead>
-                <tr>
-                  <th>Carrier</th>
-                  <th>From</th>
-                  <th>To</th>
-                  <th class="text-end">Dep</th>
-                  <th class="text-end">Arr</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for r in sample_rows %}
-                  <tr>
-                    <td>{{ r.carrier }}</td>
-                    <td>{{ r.from }}</td>
-                    <td>{{ r.to }}</td>
-                    <td class="text-end">{{ r.dep_time }}</td>
-                    <td class="text-end">{{ r.arr_time }}</td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-          <small class="text-muted d-block mt-2">A small subset from returned offers (for context).</small>
-        </div>
-      </div>
-    {% endif %}
-
-    {% if not result and not error %}
-      <p class="text-muted mt-3">Fill the form above and click <strong>Search Cheapest</strong> to see results.</p>
-    {% endif %}
   </div>
 
-  <!-- RIGHT: How it works + Notes -->
-  <div class="col-lg-5">
-    <div class="code-window mb-3">
-      <div class="code-header">
-        <div class="d-flex align-items-center gap-2">
-          <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
-          <span>How the finder works</span>
+  <div class="cff-centered">
+  <div class="cff-form-card">
+    <form id="cffSearchForm" class="row g-3">
+      <div class="col-md-3 col-6">
+        <label class="cff-label"><span class="cff-icon"><img src="{% static 'main/icons/cheap-flight-finder/icon-origin.svg' %}" alt="" aria-hidden="true"></span>Origin</label>
+        <div class="cff-input-wrap" data-autocomplete="origin">
+          <input type="text" id="cffOrigin" class="cff-input" placeholder="City or airport" autocomplete="off" required>
+          <div class="cff-autocomplete-dropdown" id="cffOriginDropdown" style="display:none;"></div>
         </div>
-        <span>Overview</span>
       </div>
-      <div class="code-body">
-        <p>Plain-English workflow:</p>
-        <ul class="mb-3" style="padding-left:1.1rem;">
-          <li>🔎 You provide <strong>origin</strong>, <strong>destination</strong>, <strong>date</strong>, and <strong>currency</strong>.</li>
-          <li>🔐 App requests a <em>test</em> access token from <strong>Amadeus</strong>.</li>
-          <li>🧾 It queries flight offers and parses <em>itineraries → segments</em> including times.</li>
-          <li>💰 The app picks the <strong>lowest total price</strong> and shows carrier, route, and departure/arrival times.</li>
-        </ul>
-
-        <p>Limitations (test mode):</p>
-        <ul style="padding-left:1.1rem;">
-          <li>🧪 Uses Amadeus <em>test</em> environment (sandbox-like data).</li>
-          <li>⏳ Rate limits, missing routes, or partial dictionaries may occur.</li>
-          <li>🌍 Airport codes must be IATA (e.g., WAW, BCN).</li>
-        </ul>
+      <div class="col-md-3 col-6">
+        <label class="cff-label"><span class="cff-icon"><img src="{% static 'main/icons/cheap-flight-finder/icon-destination.svg' %}" alt="" aria-hidden="true"></span>Destination</label>
+        <div class="cff-input-wrap" data-autocomplete="destination">
+          <input type="text" id="cffDestination" class="cff-input" placeholder="City or airport" autocomplete="off" required>
+          <div class="cff-autocomplete-dropdown" id="cffDestinationDropdown" style="display:none;"></div>
+        </div>
       </div>
-    </div>
+      <div class="col-md-2 col-6">
+        <label class="cff-label"><span class="cff-icon"><img src="{% static 'main/icons/cheap-flight-finder/icon-calendar.svg' %}" alt="" aria-hidden="true"></span>Departure</label>
+        <input type="date" id="cffDepartDate" class="cff-input" required>
+      </div>
+      <div class="col-md-2 col-6 cff-return-wrap" id="cffReturnWrap">
+        <label class="cff-label"><span class="cff-icon"><img src="{% static 'main/icons/cheap-flight-finder/icon-calendar.svg' %}" alt="" aria-hidden="true"></span>Return</label>
+        <input type="date" id="cffReturnDate" class="cff-input">
+      </div>
+      <div class="col-md-2 col-4">
+        <label class="cff-label">Trip type</label>
+        <div class="cff-trip-toggle">
+          <button type="button" data-trip="one_way" class="is-active">One-way</button>
+          <button type="button" data-trip="round_trip">Return</button>
+        </div>
+      </div>
+      <div class="col-md-1 col-4">
+        <label class="cff-label">Currency</label>
+        <select id="cffCurrency" class="cff-input">
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+          <option value="PLN">PLN</option>
+          <option value="AZN">AZN</option>
+          <option value="TRY">TRY</option>
+          <option value="AED">AED</option>
+          <option value="RUB">RUB</option>
+        </select>
+      </div>
+      <div class="col-md-1 col-4">
+        <label class="cff-label">Adults</label>
+        <input type="number" id="cffAdults" class="cff-input" min="1" max="9" value="1">
+      </div>
+      <div class="col-12 text-end">
+        <button type="submit" id="cffSearchBtn" class="cff-btn cff-btn-primary">Search flights</button>
+      </div>
+    </form>
+  </div>
 
-    <div class="alert alert-warning border-0 shadow-sm">
-      <strong>Heads-up:</strong> Educational demo only — not booking or live pricing. Always verify offers on real providers before making travel decisions.
+  <!-- Filter Bar -->
+  <div class="cff-filter-bar" id="cffFilterBar" style="display:none;">
+    <button type="button" class="cff-filter-toggle" id="cffFilterToggle" aria-expanded="false" aria-controls="cffFilterContent">
+      <span><span class="cff-icon"><img src="{% static 'main/icons/cheap-flight-finder/icon-filter.svg' %}" alt="" aria-hidden="true"></span>Filters</span>
+      <span aria-hidden="true">▼</span>
+    </button>
+    <div class="cff-filter-content" id="cffFilterContent">
+    <span class="cff-filter-label"><span class="cff-icon"><img src="{% static 'main/icons/cheap-flight-finder/icon-filter.svg' %}" alt="" aria-hidden="true"></span>Stops:</span>
+    <div class="cff-filter-group" data-filter="stops">
+      <button type="button" class="cff-filter-btn is-active" data-value="any">Any</button>
+      <button type="button" class="cff-filter-btn" data-value="direct">Direct</button>
+      <button type="button" class="cff-filter-btn" data-value="1">Up to 1</button>
+      <button type="button" class="cff-filter-btn" data-value="2">Up to 2</button>
     </div>
+    <span class="cff-filter-label ms-3">Sort:</span>
+    <div class="cff-filter-group" data-filter="sort">
+      <button type="button" class="cff-filter-btn is-active" data-value="cheapest">Cheapest</button>
+      <button type="button" class="cff-filter-btn" data-value="fastest">Fastest</button>
+      <button type="button" class="cff-filter-btn" data-value="best_value">Best value</button>
+    </div>
+    <span class="cff-filter-label ms-3">Departure:</span>
+    <div class="cff-filter-group" data-filter="time">
+      <button type="button" class="cff-filter-btn is-active" data-value="any">Any</button>
+      <button type="button" class="cff-filter-btn" data-value="morning">Morning</button>
+      <button type="button" class="cff-filter-btn" data-value="afternoon">Afternoon</button>
+      <button type="button" class="cff-filter-btn" data-value="evening">Evening</button>
+      <button type="button" class="cff-filter-btn" data-value="night">Night</button>
+    </div>
+    </div>
+  </div>
 
-    <div class="alert alert-secondary border-0 shadow-sm" style="font-size:.95rem;">
-      <strong>Notes:</strong> Requires <code>AMADEUS_CLIENT_ID</code> and <code>AMADEUS_CLIENT_SECRET</code>. If you get “No offers found”, try another date/route or check your API plan.
+  <div class="cff-results-section">
+  <div class="cff-results-grid">
+    <div>
+      <div id="cffResultsPlaceholder" class="cff-empty" style="display:none;">
+        <div class="cff-empty-title">Enter your search</div>
+        <div class="cff-empty-desc">Fill in origin, destination and date, then click Search flights.</div>
+      </div>
+      <div id="cffResultsLoading" style="display:none;">
+        <div class="cff-skeleton cff-skeleton-card"></div>
+        <div class="cff-skeleton cff-skeleton-card"></div>
+        <div class="cff-skeleton cff-skeleton-card"></div>
+      </div>
+      <div id="cffResultsError" class="cff-error-state" style="display:none;">
+        <div class="cff-error-title" id="cffErrorTitle">Search failed</div>
+        <div class="cff-error-desc" id="cffErrorDesc"></div>
+      </div>
+      <div id="cffResultsEmpty" class="cff-empty" style="display:none;">
+        <div class="cff-empty-title">No flights found</div>
+        <div class="cff-empty-desc">Try different dates or routes.</div>
+      </div>
+      <div id="cffResultsList" style="display:none;"></div>
+    </div>
+  </div>
+  </div>
+  </div>
+</div>
+
+<!-- Flight Detail Modal -->
+<div class="cff-detail-modal-backdrop" id="cffDetailModal">
+  <div class="cff-detail-modal" id="cffDetailModalInner">
+    <div class="cff-detail-modal-header">
+      <span class="cff-detail-modal-header-title">Flight details</span>
+      <button type="button" class="cff-detail-modal-close" aria-label="Close" id="cffDetailModalClose">&times;</button>
+    </div>
+    <div class="cff-detail-modal-scroll">
+      <div class="cff-detail-modal-body" id="cffDetailModalBody"></div>
+      <div id="cffDetailModalAi" class="cff-detail-modal-body cff-city-guide-section" style="border-top:2px solid var(--cff-border);padding-top:1.5rem;background:var(--cff-bg);display:none;"></div>
     </div>
   </div>
 </div>
+
+<!-- Email Modal -->
+<div class="cff-modal-backdrop" id="cffEmailModal">
+  <div class="cff-modal" style="position:relative;">
+    <button type="button" class="cff-modal-close" aria-label="Close" id="cffEmailModalClose">&times;</button>
+    <div class="cff-modal-title">Send flight via Email</div>
+    <label class="cff-label" for="cffEmailInput">Email address</label>
+    <input type="email" id="cffEmailInput" class="cff-input" placeholder="you@example.com" autocomplete="email">
+    <div class="cff-ai-error" id="cffEmailError" style="display:none;margin-top:.5rem;"></div>
+    <div class="cff-modal-email-actions">
+      <button type="button" class="cff-btn cff-btn-primary" id="cffEmailSubmit">Send via Email</button>
+      <button type="button" class="cff-btn" id="cffEmailCancel" style="background:var(--cff-bg);color:var(--cff-muted);">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Overlay — tarama animasyonu -->
+<div class="cff-loading-overlay" id="cffLoadingOverlay">
+  <div class="cff-loading-scan"></div>
+  <div class="cff-loading-status" id="cffLoadingStatus">Searching fares...</div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const API_SEARCH = '/cheap-flight-finder/api/search/';
+  const API_LOCATIONS = '/cheap-flight-finder/api/locations/';
+  const API_STORE_CONTEXT = '/cheap-flight-finder/api/store-context/';
+  const API_RESTORE_CONTEXT = '/cheap-flight-finder/api/restore-context/';
+  const API_SEND_SMS = '/cheap-flight-finder/api/send-sms/';
+  const API_SEND_EMAIL = '/cheap-flight-finder/api/send-email/';
+  const API_CITY_GUIDE = '/cheap-flight-finder/api/city-guide/';
+  const API_PLACE_PHOTO = '/cheap-flight-finder/api/place-photo/';
+  const API_PLACE_DETAILS = '/cheap-flight-finder/api/place-details/';
+
+  const root = document.getElementById('cffApp');
+  const USER_AUTH = root && root.dataset.userAuth === '1';
+  const LOGIN_URL = (root && root.dataset.loginUrl) || '/auth/login/';
+  const NEXT_URL = (root && root.dataset.nextUrl) || '/cheap-flight-finder/';
+
+  function toast(msg, tag) {
+    if (typeof window.showToast === 'function') window.showToast(msg, tag || 'info');
+    else console.log(tag || 'info', msg);
+  }
+
+  function getCookie(name) {
+    const m = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+    return m ? m[2] : null;
+  }
+
+  let state = {
+    allFlights: [],
+    filteredFlights: [],
+    selectedFlight: null,
+    searchMeta: null,
+    filters: { stops: 'any', sort: 'cheapest', time: 'any' }
+  };
+
+  function debounce(fn, ms) {
+    let t;
+    return function(...args) {
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, args), ms);
+    };
+  }
+
+  const locationsCache = {};
+  async function fetchLocations(q, limit) {
+    if (!q || q.length < 2) return [];
+    const key = q.toLowerCase() + '|' + limit;
+    if (locationsCache[key]) return locationsCache[key];
+    try {
+      const r = await fetch(API_LOCATIONS + '?q=' + encodeURIComponent(q) + '&limit=' + limit);
+      const d = await r.json();
+      const data = (d && d.data) || [];
+      locationsCache[key] = data;
+      return data;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function timeOfDay(hh) {
+    if (hh >= 5 && hh < 12) return 'morning';
+    if (hh >= 12 && hh < 17) return 'afternoon';
+    if (hh >= 17 && hh < 21) return 'evening';
+    return 'night';
+  }
+
+  function renderAutocomplete(container, items, onSelect) {
+    if (!items.length) {
+      container.innerHTML = '<div class="cff-autocomplete-item">No matches</div>';
+      container.style.display = 'block';
+      return;
+    }
+    container.innerHTML = items.map(r => {
+      const label = r.label || (r.city_name ? r.city_name + ' (' + r.iata_code + ')' : r.iata_code);
+      return '<div class="cff-autocomplete-item" data-iata="' + (r.iata_code || '') + '" data-label="' + (label || '').replace(/"/g, '&quot;') + '">' +
+        '<span class="cff-item-iata">' + (r.iata_code || '') + '</span> ' + (r.city_name || '') + (r.airport_name ? ' — ' + r.airport_name : '') + '<br>' +
+        '<span class="cff-item-meta">' + (r.country_code || '') + '</span></div>';
+    }).join('');
+    container.style.display = 'block';
+    container.querySelectorAll('.cff-autocomplete-item').forEach((el, i) => {
+      el.addEventListener('click', () => {
+        const iata = el.dataset.iata;
+        const label = el.dataset.label;
+        if (iata) onSelect(iata, label);
+        container.style.display = 'none';
+      });
+    });
+  }
+
+  function initAutocomplete(inputId, dropdownId, onSelect) {
+    const input = document.getElementById(inputId);
+    const dropdown = document.getElementById(dropdownId);
+    if (!input || !dropdown) return;
+
+    const doSearch = debounce(async () => {
+      const q = input.value.trim();
+      if (q.length < 2) {
+        dropdown.style.display = 'none';
+        return;
+      }
+      const items = await fetchLocations(q, 10);
+      renderAutocomplete(dropdown, items, (iata, label) => {
+        input.value = label || iata;
+        input.dataset.iata = iata;
+        onSelect && onSelect(iata);
+      });
+    }, 320);
+
+    input.addEventListener('input', () => { delete input.dataset.iata; doSearch(); });
+    input.addEventListener('focus', () => { if (input.value.trim().length >= 2) doSearch(); });
+    document.addEventListener('click', (e) => {
+      if (!input.contains(e.target) && !dropdown.contains(e.target)) dropdown.style.display = 'none';
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') dropdown.style.display = 'none';
+      const items = dropdown.querySelectorAll('.cff-autocomplete-item');
+      if (items.length && (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter')) {
+        e.preventDefault();
+        let idx = -1;
+        items.forEach((el, i) => { if (el.classList.contains('is-focused')) idx = i; });
+        if (e.key === 'ArrowDown') idx = Math.min(idx + 1, items.length - 1);
+        if (e.key === 'ArrowUp') idx = Math.max(idx - 1, 0);
+        items.forEach((el, i) => el.classList.toggle('is-focused', i === idx));
+        if (e.key === 'Enter' && idx >= 0 && items[idx].dataset.iata) {
+          input.value = items[idx].dataset.label || items[idx].dataset.iata;
+          input.dataset.iata = items[idx].dataset.iata;
+          dropdown.style.display = 'none';
+        }
+      }
+    });
+  }
+
+  function applyFilters() {
+    let list = [...state.allFlights];
+    const f = state.filters;
+
+    if (f.stops !== 'any') {
+      if (f.stops === 'direct') list = list.filter(x => x.stops === 0);
+      else list = list.filter(x => x.stops <= parseInt(f.stops, 10));
+    }
+
+    if (f.time !== 'any') {
+      list = list.filter(x => {
+        const dep = x.departure_time || '';
+        const h = parseInt(dep.split(':')[0], 10);
+        return timeOfDay(isNaN(h) ? 12 : h) === f.time;
+      });
+    }
+
+    if (f.sort === 'cheapest') list.sort((a, b) => (a.price || 0) - (b.price || 0));
+    else if (f.sort === 'fastest') list.sort((a, b) => (a.total_minutes || 0) - (b.total_minutes || 0));
+    else if (f.sort === 'best_value') {
+      list.sort((a, b) => {
+        const va = (a.price || 0) / Math.max(1, a.total_minutes || 60);
+        const vb = (b.price || 0) / Math.max(1, b.total_minutes || 60);
+        return va - vb;
+      });
+    }
+
+    state.filteredFlights = list;
+    return list;
+  }
+
+  function renderFlightCard(flight) {
+    const badges = (flight.badges || []).map(b => {
+      const c = b === 'cheapest' ? 'cheapest' : b === 'shortest' ? 'shortest' : 'best_value';
+      return '<span class="cff-badge cff-badge-' + c + '">' + b.replace('_', ' ') + '</span>';
+    }).join('');
+    const nextDay = flight.next_day_arrival ? ' <span class="cff-card-meta">(arrives next day)</span>' : '';
+    return '<div class="cff-flight-card" data-id="' + (flight.id || '') + '">' +
+      '<div class="d-flex justify-content-between align-items-start">' +
+        '<div>' +
+          '<div class="cff-card-price">' + (flight.price_display || flight.price + ' ' + flight.currency) + '</div>' +
+          '<div class="cff-card-route">' + (flight.route_display || '') + '</div>' +
+          '<div class="cff-card-meta">' + (flight.primary_airline || '') + ' · ' + (flight.stop_label || '') + ' · ' + (flight.total_duration || '') + nextDay + '</div>' +
+          (badges ? '<div class="cff-badges">' + badges + '</div>' : '') +
+        '</div>' +
+        '<div class="text-end">' +
+          '<div class="cff-card-meta">' + (flight.departure_time || '') + ' – ' + (flight.arrival_time || '') + '</div>' +
+          (flight.days_left != null ? '<div class="cff-card-meta">' + flight.days_left + ' days left</div>' : '') +
+        '</div>' +
+      '</div></div>';
+  }
+
+  function renderDetailContent(flight) {
+    const segs = (flight.outbound && flight.outbound.segments) || flight.segments || [];
+    const retLeg = flight.return_leg;
+    let timeline = segs.map(s => '<div class="cff-detail-timeline-item">' +
+      (s.departure_iata || '') + ' ' + (s.departure_time || '') + ' → ' +
+      (s.arrival_iata || '') + ' ' + (s.arrival_time || '') + ' · ' + (s.carrier_name || s.carrier_code || '') +
+      '</div>').join('');
+    const destIata = flight.outbound_arrival_iata || flight.arrival_iata || flight.destination;
+    if (!timeline && (flight.departure_iata || flight.origin) && destIata) {
+      timeline = '<div class="cff-detail-timeline-item">' +
+        (flight.departure_iata || flight.origin || '') + ' ' + (flight.departure_time || flight.depart_time || '') + ' → ' +
+        destIata + ' ' + (flight.arrival_time || '') + ' · ' + (flight.primary_airline || flight.airline || '') +
+        '</div>';
+    }
+    if (retLeg && retLeg.segments && retLeg.segments.length) {
+      timeline += '<div class="cff-detail-timeline-item" style="margin-top:.75rem;"><strong>Return</strong></div>';
+      timeline += retLeg.segments.map(s => '<div class="cff-detail-timeline-item">' +
+        (s.departure_iata || '') + ' ' + (s.departure_time || '') + ' → ' +
+        (s.arrival_iata || '') + ' ' + (s.arrival_time || '') + ' · ' + (s.carrier_name || s.carrier_code || '') +
+        '</div>').join('');
+    }
+    const badges = (flight.badges || []).map(b => '<span class="cff-badge cff-badge-' + (b === 'cheapest' ? 'cheapest' : b === 'shortest' ? 'shortest' : 'best_value') + '">' + b.replace('_', ' ') + '</span>').join(' ');
+    const nextDay = flight.next_day_arrival ? ' <span style="font-size:.8rem;color:var(--cff-muted)">(arrives next day)</span>' : '';
+    return '<div class="cff-detail-route">' + (flight.route_display || '') + nextDay + '</div>' +
+      '<div style="font-size:.85rem;color:var(--cff-muted);margin-bottom:.5rem;">' + (flight.primary_airline || '') + ' · ' + (flight.stop_label || '') + ' · ' + (flight.total_duration || '') + (flight.days_left != null ? ' · ' + flight.days_left + ' days left' : '') + '</div>' +
+      '<div class="cff-detail-price">' + (flight.price_display || flight.price + ' ' + flight.currency) + '</div>' +
+      (badges ? '<div class="cff-badges mb-2">' + badges + '</div>' : '') +
+      '<div class="cff-detail-timeline">' + timeline + '</div>' +
+      '<div class="cff-detail-note">Prices may change until booking.</div>' +
+      '<div class="cff-cta-row"><button type="button" class="cff-cta-btn cff-cta-email is-enabled">Send via Email</button></div>';
+  }
+
+  function selectFlight(flight, listEl, cardEl) {
+    state.selectedFlight = flight;
+    if (listEl) {
+      listEl.querySelectorAll('.cff-flight-card').forEach(c => c.classList.remove('is-selected'));
+      if (cardEl) cardEl.classList.add('is-selected');
+    }
+    document.getElementById('cffDetailModalBody').innerHTML = renderDetailContent(flight);
+    const aiEl = document.getElementById('cffDetailModalAi');
+    aiEl.style.display = 'none';
+    aiEl.innerHTML = '';
+    var cityDisplay = (state.searchMeta && state.searchMeta.destination_city) || (state.searchMeta && state.searchMeta.destination_query) || flight.arrival_city || '';
+    var cityApi = (state.searchMeta && state.searchMeta.destination_city) || (state.searchMeta && state.searchMeta.destination_query) || flight.arrival_city || (flight.outbound_arrival_iata || flight.arrival_iata || flight.destination) || '';
+    var cityName = (typeof cityDisplay === 'string' ? cityDisplay.split(',')[0].trim() : '') || (typeof cityApi === 'string' ? cityApi.split(',')[0].trim() : '') || 'Your Destination';
+    const country = (state.searchMeta && state.searchMeta.destination_country) || '';
+    const departDate = (state.searchMeta && state.searchMeta.depart_date) || flight.departure_date || flight.depart_date;
+    const returnDate = (state.searchMeta && state.searchMeta.return_date) || flight.arrival_date;
+    var modalBackdrop = document.getElementById('cffDetailModal');
+    var modalInner = document.getElementById('cffDetailModalInner');
+    if ((cityApi || cityDisplay) && state.searchMeta) {
+      modalInner.classList.add('has-city-guide');
+      aiEl.style.display = 'block';
+      aiEl.innerHTML = '<div class="cff-ai-section-title">Discover ' + escapeHtml(cityName) + '</div><div class="cff-ai-loading">Loading...</div>';
+      fetchCityGuide(cityApi || cityDisplay, country, departDate, returnDate, aiEl, cityName).then(function() {});
+    } else {
+      modalInner.classList.remove('has-city-guide');
+    }
+    modalBackdrop.classList.add('is-visible');
+  }
+
+  function fetchCityGuide(city, country, departDate, returnDate, targetEl, displayCityName) {
+    const el = targetEl || document.getElementById('cffAiContent');
+    const cityLoc = (city + (country ? ', ' + country : '')).trim() || city;
+    const cityName = displayCityName || (city && typeof city === 'string' ? city.split(',')[0].trim() : '') || 'Your Destination';
+    const params = new URLSearchParams({ city: city });
+    if (country) params.set('country', country);
+    if (departDate) params.set('depart_date', departDate);
+    if (returnDate) params.set('return_date', returnDate);
+    return fetch(API_CITY_GUIDE + '?' + params).then(function(r) { return r.json(); }).then(function(data) {
+      if (!el) return false;
+      if (!data.success || !data.data) {
+        el.innerHTML = '<div class="cff-ai-error">' + (data.error || 'No city guide data') + '</div>';
+        return false;
+      }
+      const d = data.data;
+      var iconBase = (document.getElementById('cffApp') && document.getElementById('cffApp').dataset.staticIcons) || '/static/main/icons/cheap-flight-finder/';
+      iconBase = (iconBase.replace(/\/$/, '') + '/');
+      function iconH(name) { return '<span class="cff-ai-card-icon"><img src="' + iconBase + 'icon-' + name + '.svg" alt="" aria-hidden="true"></span>'; }
+      var titleHtml = '<div class="cff-ai-section-title">Discover ' + escapeHtml(cityName) + '</div>';
+      function mapUrl(place) {
+        var q = (place && place.trim()) ? (place + ', ' + cityLoc) : cityLoc;
+        return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
+      }
+      var defaultMap = mapUrl('');
+      var html = '';
+      if (d.overview) html += '<div class="cff-ai-card"><h4>Overview</h4><p>' + escapeHtml(d.overview) + '</p></div>';
+
+      function renderCarousel(title, icon, items, querySuffix) {
+        if (!items || !items.length) return '';
+        var carouselId = 'carousel-' + Math.random().toString(36).slice(2);
+        var carouselHtml = '<div class="cff-carousel-section" data-carousel-id="' + carouselId + '"><div class="cff-carousel-title">' + iconH(icon) + escapeHtml(title) + '</div><div class="cff-carousel-wrap"><button type="button" class="cff-carousel-btn cff-carousel-prev" aria-label="Previous">&lsaquo;</button><div class="cff-carousel"><div class="cff-carousel-track">';
+        items.forEach(function(name) {
+          var n = (typeof name === 'string' ? name : (name && name.name) || '').trim();
+          if (!n) return;
+          var query = n + ' ' + (querySuffix || '') + ' ' + cityLoc;
+          carouselHtml += '<div class="cff-place-card" data-query="' + escapeHtml(query) + '"><div class="cff-place-card-img"></div><div class="cff-place-card-body"><div class="cff-place-card-name">' + escapeHtml(n) + '</div><div class="cff-place-card-meta">Loading...</div><div class="cff-place-card-address" style="display:none;"></div><div class="cff-place-card-link">View on map &rarr;</div></div></div>';
+        });
+        carouselHtml += '</div></div><button type="button" class="cff-carousel-btn cff-carousel-next" aria-label="Next">&rsaquo;</button></div></div>';
+        return carouselHtml;
+      }
+      html += renderCarousel('Top Hotels', 'map', d.top_hotels || [], 'hotel');
+      html += renderCarousel('Food & Restaurants', 'restaurant', d.top_restaurants || [], 'restaurant');
+      html += renderCarousel('Best Kebab Restaurants', 'restaurant', d.top_kebab_restaurants || [], 'kebab restaurant');
+      html += renderCarousel('Best Places to Visit', 'map', d.top_attractions || [], 'museum landmark');
+
+      if (d.events) html += '<div class="cff-ai-card"><h4>' + iconH('map') + 'Events</h4><p>' + escapeHtml(d.events) + '</p></div>';
+      if (d.weather) html += '<div class="cff-ai-card"><h4>' + iconH('map') + 'Weather</h4><p>' + escapeHtml(d.weather) + '</p></div>';
+      if (d.transport) html += '<div class="cff-ai-card"><h4>' + iconH('transport') + 'Getting Around</h4><p>' + escapeHtml(d.transport) + '</p><a href="' + defaultMap + '" target="_blank" rel="noopener">Transport info</a></div>';
+      if (d.transport_tips) html += '<div class="cff-ai-card"><h4>' + iconH('transport') + 'Tickets & Transport</h4><p>' + escapeHtml(d.transport_tips) + '</p><a href="' + defaultMap + '" target="_blank" rel="noopener">View on map</a></div>';
+      if (d.airport_transfer) html += '<div class="cff-ai-card"><h4>' + iconH('airport') + 'Airport to City</h4><p>' + escapeHtml(d.airport_transfer) + '</p><a href="' + mapUrl('airport') + '" target="_blank" rel="noopener">Airport transfer</a></div>';
+      if (d.card_vs_cash) html += '<div class="cff-ai-card"><h4>' + iconH('budget') + 'Card or Cash?</h4><p>' + escapeHtml(d.card_vs_cash) + '</p></div>';
+      if (d.budget) html += '<div class="cff-ai-card"><h4>' + iconH('budget') + 'Budget</h4><p>' + escapeHtml(d.budget) + '</p></div>';
+      if (d.car_rental) html += '<div class="cff-ai-card"><h4>' + iconH('car-rental') + 'Car Rental</h4><p>' + escapeHtml(d.car_rental) + '</p><a href="https://www.rentalcars.com/" target="_blank" rel="noopener">Compare rentals</a></div>';
+      if (d.local_tips) html += '<div class="cff-ai-card"><h4>' + iconH('map') + 'Local Tips</h4><p>' + escapeHtml(d.local_tips) + '</p></div>';
+      el.innerHTML = titleHtml + (html || '<div class="cff-ai-error">No guide data</div>');
+      var base = (document.getElementById('cffApp') && document.getElementById('cffApp').dataset.staticImg) || '/static/main/img/cheap-flight-finder/';
+      base = base.replace(/\/$/, '') + '/';
+      var fallback = 'linear-gradient(135deg, #e8e8f8 0%, #ddddef 50%, #e0e0f0 100%)';
+
+      el.querySelectorAll('.cff-place-card[data-query]').forEach(function(card) {
+        var query = card.getAttribute('data-query');
+        var imgEl = card.querySelector('.cff-place-card-img');
+        var metaEl = card.querySelector('.cff-place-card-meta');
+        var addrEl = card.querySelector('.cff-place-card-address');
+        var nameEl = card.querySelector('.cff-place-card-name');
+        if (!query || !imgEl) return;
+        imgEl.style.backgroundImage = "url('" + API_PLACE_PHOTO + "?query=" + encodeURIComponent(query) + "'), " + fallback;
+        imgEl.style.backgroundSize = 'cover';
+        imgEl.style.backgroundPosition = 'center';
+
+        fetch(API_PLACE_DETAILS + '?query=' + encodeURIComponent(query)).then(function(r) { return r.json(); }).then(function(res) {
+          if (!res.success || !res.data) {
+            if (metaEl) metaEl.textContent = '';
+            return;
+          }
+          var p = res.data;
+          var metaParts = [];
+          if (p.rating != null) metaParts.push('<span class="cff-place-card-rating">★ ' + p.rating + (p.user_ratings_total ? ' (' + p.user_ratings_total + ')' : '') + '</span>');
+          if (p.price_display) metaParts.push('<span class="cff-place-card-price">' + escapeHtml(p.price_display) + '</span>');
+          if (metaEl) metaEl.innerHTML = metaParts.join(' ');
+          if (addrEl && p.formatted_address) {
+            addrEl.textContent = p.formatted_address;
+            addrEl.style.display = 'block';
+          }
+          if (p.maps_url) {
+            var wrap = document.createElement('a');
+            wrap.href = p.maps_url;
+            wrap.target = '_blank';
+            wrap.rel = 'noopener';
+            wrap.className = 'cff-place-card';
+            wrap.innerHTML = card.innerHTML;
+            card.parentNode.replaceChild(wrap, card);
+          }
+        }).catch(function() { if (metaEl) metaEl.textContent = ''; });
+      });
+
+      el.querySelectorAll('.cff-carousel-section').forEach(function(section) {
+        var track = section.querySelector('.cff-carousel-track');
+        var prevBtn = section.querySelector('.cff-carousel-prev');
+        var nextBtn = section.querySelector('.cff-carousel-next');
+        var cards = section.querySelectorAll('.cff-place-card');
+        var total = cards.length;
+        var idx = 0;
+        if (!track || total === 0) return;
+        function updateSlider() {
+          track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+          prevBtn.disabled = idx <= 0;
+          nextBtn.disabled = idx >= total - 1;
+        }
+        prevBtn.addEventListener('click', function() { if (idx > 0) { idx--; updateSlider(); } });
+        nextBtn.addEventListener('click', function() { if (idx < total - 1) { idx++; updateSlider(); } });
+        updateSlider();
+      });
+      return true;
+    }).catch(function() {
+      if (el) el.innerHTML = '<div class="cff-ai-error">City guide unavailable</div>';
+      return false;
+    });
+  }
+
+  function escapeHtml(s) {
+    if (!s) return '';
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function showSection(id) {
+    ['cffResultsPlaceholder','cffResultsLoading','cffResultsError','cffResultsEmpty','cffResultsList'].forEach(s => {
+      const el = document.getElementById(s);
+      if (el) el.style.display = s === id ? 'block' : 'none';
+    });
+  }
+
+  async function doSearch() {
+    const origin = document.getElementById('cffOrigin');
+    const dest = document.getElementById('cffDestination');
+    const depart = document.getElementById('cffDepartDate');
+    const ret = document.getElementById('cffReturnDate');
+    const trip = document.querySelector('[data-trip].is-active');
+    const tripType = (trip && trip.dataset.trip) || 'one_way';
+    const currency = document.getElementById('cffCurrency').value;
+    const adults = document.getElementById('cffAdults').value || '1';
+
+    let originVal = origin.dataset.iata || origin.value.trim();
+    let destVal = dest.dataset.iata || dest.value.trim();
+    if (!originVal || !destVal || !depart.value) {
+      origin.classList.toggle('is-invalid', !originVal);
+      dest.classList.toggle('is-invalid', !destVal);
+      depart.classList.toggle('is-invalid', !depart.value);
+      toast('Please fill origin, destination and departure date.', 'warning');
+      return;
+    }
+    if (tripType === 'round_trip' && ret.value && depart.value) {
+      var depD = new Date(depart.value);
+      var retD = new Date(ret.value);
+      if (retD < depD) {
+        ret.classList.add('is-invalid');
+        toast('Return date cannot be before departure date.', 'warning');
+        return;
+      }
+    }
+    origin.classList.remove('is-invalid');
+    dest.classList.remove('is-invalid');
+    depart.classList.remove('is-invalid');
+    ret.classList.remove('is-invalid');
+
+    const params = new URLSearchParams({
+      origin: originVal, destination: destVal, depart_date: depart.value,
+      trip_type: tripType, currency, adults
+    });
+    if (tripType === 'round_trip' && ret.value) params.set('return_date', ret.value);
+
+    const overlay = document.getElementById('cffLoadingOverlay');
+    const statusEl = document.getElementById('cffLoadingStatus');
+    const statuses = ['Searching fares...', 'Comparing routes...', 'Checking airlines...', 'Preparing best options...'];
+    let si = 0;
+    overlay.classList.add('is-visible');
+    showSection('cffResultsLoading');
+    document.getElementById('cffFilterBar').style.display = 'none';
+    const statusInterval = setInterval(() => {
+      statusEl.textContent = statuses[si % statuses.length];
+      si++;
+    }, 800);
+
+    toast('Searching flights...', 'info');
+
+    try {
+      const r = await fetch(API_SEARCH + '?' + params.toString());
+      const data = await r.json();
+      clearInterval(statusInterval);
+      overlay.classList.remove('is-visible');
+
+      if (!data.success) {
+        const errs = (data.errors || []).join(', ') || 'Search failed';
+        showSection('cffResultsError');
+        document.getElementById('cffErrorTitle').textContent = 'Search failed';
+        document.getElementById('cffErrorDesc').textContent = errs;
+        toast('Search failed: ' + errs, 'error');
+        return;
+      }
+
+      const flights = (data.data || []);
+      state.allFlights = flights;
+      state.selectedFlight = null;
+      state.searchMeta = data.meta || null;
+      document.getElementById('cffDetailModal').classList.remove('is-visible');
+
+      if (flights.length === 0) {
+        showSection('cffResultsEmpty');
+        toast('No flights found', 'warning');
+      } else {
+        document.getElementById('cffFilterBar').style.display = 'flex';
+        applyFilters();
+        const list = document.getElementById('cffResultsList');
+        list.innerHTML = state.filteredFlights.map(renderFlightCard).join('');
+        list.querySelectorAll('.cff-flight-card').forEach(card => {
+          card.addEventListener('click', () => {
+            const id = card.dataset.id;
+            const flight = state.filteredFlights.find(f => (f.id || '') === id) || state.allFlights.find(f => (f.id || '') === id);
+            if (flight) selectFlight(flight, list, card);
+          });
+        });
+        showSection('cffResultsList');
+        toast(flights.length + ' flights found', 'info');
+      }
+    } catch (e) {
+      clearInterval(statusInterval);
+      overlay.classList.remove('is-visible');
+      showSection('cffResultsError');
+      document.getElementById('cffErrorTitle').textContent = 'Connection error';
+      document.getElementById('cffErrorDesc').textContent = 'Please check your connection and try again.';
+      toast('Search failed', 'error');
+    }
+  }
+
+  document.getElementById('cffSearchForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    doSearch();
+  });
+
+  function syncReturnDateMin() {
+    var depart = document.getElementById('cffDepartDate');
+    var ret = document.getElementById('cffReturnDate');
+    if (depart && ret && depart.value) ret.setAttribute('min', depart.value);
+  }
+  document.getElementById('cffDepartDate').addEventListener('change', syncReturnDateMin);
+  document.getElementById('cffDepartDate').addEventListener('input', syncReturnDateMin);
+
+  document.querySelectorAll('.cff-trip-toggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.cff-trip-toggle button').forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      document.getElementById('cffReturnWrap').style.display = btn.dataset.trip === 'round_trip' ? 'block' : 'none';
+      syncReturnDateMin();
+    });
+  });
+  document.getElementById('cffReturnWrap').style.display = 'none';
+  syncReturnDateMin();
+
+  document.getElementById('cffFilterToggle').addEventListener('click', function() {
+    var bar = document.getElementById('cffFilterBar');
+    var open = bar.classList.toggle('is-open');
+    this.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.querySelectorAll('.cff-filter-bar [data-filter]').forEach(group => {
+    group.querySelectorAll('.cff-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('.cff-filter-btn').forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        state.filters[group.dataset.filter] = btn.dataset.value;
+        if (state.allFlights.length) {
+          applyFilters();
+          const list = document.getElementById('cffResultsList');
+          const sel = state.selectedFlight;
+          const stillVisible = sel && state.filteredFlights.some(f => (f.id || '') === (sel.id || ''));
+          if (!stillVisible) {
+            state.selectedFlight = null;
+            document.getElementById('cffDetailModal').classList.remove('is-visible');
+          }
+          list.innerHTML = state.filteredFlights.map(renderFlightCard).join('');
+          list.querySelectorAll('.cff-flight-card').forEach(card => {
+            card.addEventListener('click', () => {
+              const id = card.dataset.id;
+              const flight = state.filteredFlights.find(f => (f.id || '') === id);
+              if (flight) selectFlight(flight, list, card);
+            });
+            if (state.selectedFlight && (state.selectedFlight.id || '') === card.dataset.id) card.classList.add('is-selected');
+          });
+        }
+      });
+    });
+  });
+
+  initAutocomplete('cffOrigin', 'cffOriginDropdown');
+  initAutocomplete('cffDestination', 'cffDestinationDropdown');
+
+  document.getElementById('cffApp').addEventListener('click', function(e) {
+    const emailBtn = e.target.closest('.cff-cta-email');
+    if (emailBtn && state.selectedFlight) {
+      e.preventDefault();
+      if (!USER_AUTH) {
+        fetch(API_STORE_CONTEXT, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') || '', 'X-Requested-With': 'XMLHttpRequest' }, body: JSON.stringify({ flight: buildStorePayload(state.selectedFlight) }) })
+          .then(function(r) { return r.json().catch(function() { return { success: false, error: 'Request failed' }; }); })
+          .then(function(d) {
+            if (d && d.success) window.location.href = LOGIN_URL + '?next=' + encodeURIComponent(NEXT_URL);
+            else toast((d && d.error) || 'Could not save. Try again.', 'error');
+          }).catch(function() { toast('Could not save. Try again.', 'error'); });
+      } else {
+        document.getElementById('cffEmailModal').classList.add('is-visible');
+        document.getElementById('cffEmailInput').value = '';
+        document.getElementById('cffEmailError').style.display = 'none';
+      }
+    }
+  });
+
+  function buildStorePayload(flight) {
+    var dest = flight.outbound_arrival_iata || flight.arrival_iata || flight.destination;
+    return {
+      id: flight.id,
+      origin: flight.departure_iata || flight.origin,
+      destination: dest,
+      depart_date: flight.departure_date || flight.depart_date,
+      return_date: flight.arrival_date,
+      price: flight.price,
+      currency: flight.currency,
+      duration_minutes: flight.total_minutes,
+      stops: flight.stops,
+      airline: flight.primary_airline || flight.airline,
+      depart_time: flight.departure_time || flight.depart_time,
+      arrival_time: flight.arrival_time,
+      route_display: flight.route_display,
+      price_display: flight.price_display,
+      primary_airline: flight.primary_airline,
+      stop_label: flight.stop_label,
+      total_duration: flight.total_duration,
+      departure_date: flight.departure_date,
+      departure_time: flight.departure_time,
+      arrival_date: flight.arrival_date,
+      departure_iata: flight.departure_iata,
+      arrival_iata: flight.arrival_iata
+    };
+  }
+
+  function closeDetailModal() {
+    document.getElementById('cffDetailModal').classList.remove('is-visible');
+    document.getElementById('cffDetailModalInner').classList.remove('has-city-guide');
+  }
+  function closeEmailModal() { document.getElementById('cffEmailModal').classList.remove('is-visible'); }
+  document.getElementById('cffDetailModalClose').addEventListener('click', closeDetailModal);
+  document.getElementById('cffDetailModal').addEventListener('click', function(e) { if (e.target === this) closeDetailModal(); });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      if (document.getElementById('cffEmailModal').classList.contains('is-visible')) closeEmailModal();
+      else closeDetailModal();
+    }
+  });
+  document.getElementById('cffEmailModalClose').addEventListener('click', closeEmailModal);
+  document.getElementById('cffEmailCancel').addEventListener('click', closeEmailModal);
+  document.getElementById('cffEmailModal').addEventListener('click', function(e) { if (e.target === this) closeEmailModal(); });
+
+  document.getElementById('cffEmailSubmit').addEventListener('click', function() {
+    const email = document.getElementById('cffEmailInput').value.trim();
+    const errEl = document.getElementById('cffEmailError');
+    if (!email) { errEl.textContent = 'Email is required'; errEl.style.display = 'block'; return; }
+    const re = /^[^@]+@[^@]+\.[^@]+$/;
+    if (!re.test(email)) { errEl.textContent = 'Invalid email address'; errEl.style.display = 'block'; return; }
+    errEl.style.display = 'none';
+    this.disabled = true;
+    fetch(API_SEND_EMAIL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') || '', 'X-Requested-With': 'XMLHttpRequest' }, body: JSON.stringify({ email: email, flight: state.selectedFlight }) })
+      .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+      .then(function(res) {
+        document.getElementById('cffEmailSubmit').disabled = false;
+        if (res.ok && res.data.success) { closeEmailModal(); toast('Flight details sent', 'success'); }
+        else if (res.data && res.data.error === 'Login required') { closeEmailModal(); window.location.href = LOGIN_URL + '?next=' + encodeURIComponent(NEXT_URL); }
+        else { errEl.textContent = (res.data && res.data.error) || 'Unable to send details right now'; errEl.style.display = 'block'; }
+      })
+      .catch(function() { document.getElementById('cffEmailSubmit').disabled = false; errEl.textContent = 'Unable to send. Try again.'; errEl.style.display = 'block'; });
+  });
+
+  fetch(API_RESTORE_CONTEXT).then(function(r) { return r.json(); }).then(function(d) {
+    if (d.success && d.flight) {
+      state.selectedFlight = d.flight;
+      document.getElementById('cffDetailModalBody').innerHTML = renderDetailContent(d.flight);
+      document.getElementById('cffDetailModalAi').style.display = 'none';
+      document.getElementById('cffDetailModalAi').innerHTML = '';
+      document.getElementById('cffDetailModal').classList.add('is-visible');
+      toast('Flight restored', 'success');
+    }
+  }).catch(function() {});
+
+  showSection('cffResultsPlaceholder');
+})();
+</script>
 {% endblock %}
