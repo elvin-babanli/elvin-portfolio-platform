@@ -160,25 +160,33 @@ def _env(key, default=""):
     v = config(key, default=default)
     return (v or "").strip() if isinstance(v, str) else str(v).strip()
 
+_use_mailhog = _env("USE_MAILHOG", "").lower() in ("true", "1", "yes")
 _email_backend = _env("EMAIL_BACKEND")
 _email_host = _env("EMAIL_HOST")
 _email_user = _env("EMAIL_HOST_USER")
-_email_pwd = (_env("EMAIL_HOST_PASSWORD") or "").replace(" ", "")  # App Password: spaces stripped
-_use_smtp = bool(_email_host and _email_user and _email_pwd)
+_email_pwd = (_env("EMAIL_HOST_PASSWORD") or "").replace(" ", "")
+_use_smtp = bool(_email_host and _email_user and _email_pwd) and not _use_mailhog
 
 if _email_backend:
-    EMAIL_BACKEND = _email_backend
+    EMAIL_BACKEND = _env("EMAIL_BACKEND")
+elif _use_mailhog:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = "localhost"
+    EMAIL_PORT = 1025
+    EMAIL_USE_TLS = False
+    EMAIL_HOST_USER = ""
+    EMAIL_HOST_PASSWORD = ""
 elif _use_smtp:
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-# Use smtp.gmail.com for authenticated submission; smtp-relay causes 550 relay denied
-EMAIL_HOST = "smtp.gmail.com" if _use_smtp else _email_host
-EMAIL_PORT = int(_env("EMAIL_PORT", "587") or "587")
-EMAIL_USE_TLS = _env("EMAIL_USE_TLS", "True").lower() in ("true", "1", "yes")
-EMAIL_HOST_USER = _email_user
-EMAIL_HOST_PASSWORD = _email_pwd
+if not _use_mailhog:
+    EMAIL_HOST = "smtp.gmail.com" if _use_smtp else _email_host
+    EMAIL_PORT = int(_env("EMAIL_PORT", "587") or "587")
+    EMAIL_USE_TLS = _env("EMAIL_USE_TLS", "True").lower() in ("true", "1", "yes")
+    EMAIL_HOST_USER = _email_user
+    EMAIL_HOST_PASSWORD = _email_pwd
 # From header: derived from EMAIL_HOST_USER to ensure envelope sender = auth user (avoids 550 relay)
 DEFAULT_FROM_EMAIL = (
     _env("DEFAULT_FROM_EMAIL")
