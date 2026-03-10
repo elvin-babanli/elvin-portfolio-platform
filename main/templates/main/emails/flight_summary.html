@@ -1,37 +1,206 @@
+{% load flight_filters %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your Flight Details</title>
+  <title>Flight Details — {{ brand_name }}</title>
 </head>
-<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f1f5f9;color:#0f172a;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:40px 20px;">
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f0f4ff;color:#0f172a;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f4ff;padding:40px 20px;">
     <tr>
       <td align="center">
-        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.08);overflow:hidden;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#fff;border-radius:20px;box-shadow:0 8px 40px rgba(37,99,235,.1);overflow:hidden;">
+          <!-- Header -->
           <tr>
-            <td style="padding:40px 36px;">
-              <h1 style="margin:0 0 8px;font-size:1.35rem;font-weight:700;color:#0f172a;">Flight Details</h1>
-              <p style="margin:0 0 24px;font-size:0.9rem;color:#64748b;">Here is your selected flight summary.</p>
-
-              <div style="background:#f8fafc;border-radius:12px;padding:20px;margin:0 0 20px;border:1px solid #e2e8f0;">
-                <p style="margin:0 0 8px;font-size:1.1rem;font-weight:600;color:#0f172a;">{{ flight.route_display|default:"Your route" }}</p>
-                <p style="margin:0 0 4px;font-size:1.5rem;font-weight:700;color:#2563eb;">{{ flight.price_display|default:"" }}</p>
-                <p style="margin:0;font-size:0.9rem;color:#64748b;">
-                  {{ flight.primary_airline|default:"" }} · {{ flight.stop_label|default:"" }} · {{ flight.total_duration|default:"" }}
-                </p>
-              </div>
-
-              <table width="100%" cellpadding="0" cellspacing="0" style="font-size:0.9rem;">
-                <tr><td style="padding:8px 0;color:#64748b;">Departure</td><td style="padding:8px 0;text-align:right;">{{ flight.departure_date|default:"" }} {{ flight.departure_time|default:"" }} {{ flight.departure_iata|default:"" }}</td></tr>
-                <tr><td style="padding:8px 0;color:#64748b;">Arrival</td><td style="padding:8px 0;text-align:right;">{{ flight.arrival_date|default:"" }} {{ flight.arrival_time|default:"" }} {{ flight.arrival_iata|default:"" }}</td></tr>
+            <td style="background:linear-gradient(135deg,#2563eb,#3b82f6);padding:24px 32px;">
+              <p style="margin:0 0 4px;font-size:0.7rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,.9);">Flight Itinerary</p>
+              <h1 style="margin:0;font-size:1.4rem;font-weight:700;color:#fff;">Your selected flight</h1>
+              {% if flight.id %}<p style="margin:8px 0 0;font-size:0.75rem;color:rgba(255,255,255,.8);">Ref: {{ flight.id|truncatechars:20 }}</p>{% endif %}
+            </td>
+          </tr>
+          <!-- Route + Price -->
+          <tr>
+            <td style="padding:28px 32px 20px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">
+                <tr>
+                  <td style="padding:20px 24px;">
+                    <p style="margin:0 0 8px;font-size:1.25rem;font-weight:700;color:#0f172a;">{{ flight.route_display|default:"Your route" }}</p>
+                    <p style="margin:0;font-size:1.9rem;font-weight:800;color:#2563eb;">{{ flight.price_display|default:"" }}</p>
+                  </td>
+                </tr>
               </table>
+            </td>
+          </tr>
+          <!-- Quick badges -->
+          <tr>
+            <td style="padding:0 32px 16px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding:6px 10px 6px 0;"><span style="background:#eff6ff;color:#1d4ed8;padding:6px 12px;border-radius:8px;font-weight:600;font-size:0.85rem;">{{ flight.primary_airline|default:"" }}{% if flight.flight_number %} {{ flight.flight_number }}{% endif %}</span></td>
+                  <td style="padding:6px 10px 6px 0;"><span style="background:#f0fdf4;color:#15803d;padding:6px 12px;border-radius:8px;font-weight:500;font-size:0.85rem;">{{ flight.stop_label|default:"" }}</span></td>
+                  <td style="padding:6px 0;"><span style="background:#fef3c7;color:#b45309;padding:6px 12px;border-radius:8px;font-weight:500;font-size:0.85rem;">{{ flight.total_duration|default:"" }}</span></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
-              <p style="margin:24px 0 0;font-size:0.8rem;color:#94a3b8;">Prices may change until booking. Verify on your travel provider before purchase.</p>
+          <!-- OUTBOUND (Gidiş) -->
+          {% if flight.ob_segments %}
+          <tr>
+            <td style="padding:0 32px 24px;">
+              <p style="margin:0 0 12px;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#2563eb;">{% if flight.ret_segments %}Outbound{% else %}Flight Details{% endif %}</p>
+              {% for seg in flight.ob_segments %}
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+                <tr>
+                  <td style="padding:16px 20px;background:#fafafa;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="vertical-align:top;width:45%;">
+                          <p style="margin:0 0 4px;font-size:0.7rem;font-weight:600;text-transform:uppercase;color:#94a3b8;">Departure</p>
+                          <p style="margin:0;font-size:1rem;font-weight:700;color:#0f172a;">{{ seg.departure_date|flight_date|default:"" }}</p>
+                          <p style="margin:2px 0 0;font-size:0.9rem;font-weight:600;color:#64748b;">{{ seg.departure_time|default:"" }}</p>
+                          <p style="margin:6px 0 0;font-size:0.95rem;font-weight:600;color:#2563eb;">{{ seg.departure_iata|default:"" }}</p>
+                          {% if seg.departure_terminal %}<p style="margin:2px 0 0;font-size:0.75rem;color:#64748b;">Terminal {{ seg.departure_terminal }}</p>{% endif %}
+                        </td>
+                        <td style="vertical-align:top;width:10%;text-align:center;padding-top:8px;">
+                          <span style="display:inline-block;width:24px;height:24px;background:#e0e7ff;border-radius:50%;line-height:24px;font-size:0.7rem;">→</span>
+                        </td>
+                        <td style="vertical-align:top;width:45%;">
+                          <p style="margin:0 0 4px;font-size:0.7rem;font-weight:600;text-transform:uppercase;color:#94a3b8;">Arrival</p>
+                          <p style="margin:0;font-size:1rem;font-weight:700;color:#0f172a;">{{ seg.arrival_date|flight_date|default:"" }}</p>
+                          <p style="margin:2px 0 0;font-size:0.9rem;font-weight:600;color:#64748b;">{{ seg.arrival_time|default:"" }}</p>
+                          <p style="margin:6px 0 0;font-size:0.95rem;font-weight:600;color:#059669;">{{ seg.arrival_iata|default:"" }}</p>
+                          {% if seg.arrival_terminal %}<p style="margin:2px 0 0;font-size:0.75rem;color:#64748b;">Terminal {{ seg.arrival_terminal }}</p>{% endif %}
+                        </td>
+                      </tr>
+                    </table>
+                    <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;padding-top:12px;border-top:1px solid #e2e8f0;">
+                      <tr>
+                        <td style="font-size:0.8rem;color:#64748b;">
+                          <strong style="color:#0f172a;">{{ seg.carrier_name|default:"" }}</strong>
+                          {% if seg.carrier_code or seg.number %} ({{ seg.carrier_code|default:"" }} {{ seg.number|default:"" }}){% endif %}
+                          {% if seg.aircraft_code %} · {{ seg.aircraft_code }}{% endif %}
+                          {% if seg.duration %} · {{ seg.duration }}{% endif %}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              {% endfor %}
+              {% if flight.outbound and flight.outbound.duration %}<p style="margin:0 0 0 4px;font-size:0.8rem;color:#64748b;">Duration: {{ flight.outbound.duration }}</p>{% endif %}
+            </td>
+          </tr>
+          {% endif %}
 
-              <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;">
-              <p style="margin:0;font-size:0.9rem;color:#64748b;">Best regards,<br><strong>{{ brand_name }} Team</strong></p>
+          <!-- RETURN (Geliş) -->
+          {% if flight.ret_segments %}
+          <tr>
+            <td style="padding:0 32px 24px;">
+              <p style="margin:0 0 12px;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#059669;">Return</p>
+              {% for seg in flight.ret_segments %}
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+                <tr>
+                  <td style="padding:16px 20px;background:#fafafa;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="vertical-align:top;width:45%;">
+                          <p style="margin:0 0 4px;font-size:0.7rem;font-weight:600;text-transform:uppercase;color:#94a3b8;">Departure</p>
+                          <p style="margin:0;font-size:1rem;font-weight:700;color:#0f172a;">{{ seg.departure_date|flight_date|default:"" }}</p>
+                          <p style="margin:2px 0 0;font-size:0.9rem;font-weight:600;color:#64748b;">{{ seg.departure_time|default:"" }}</p>
+                          <p style="margin:6px 0 0;font-size:0.95rem;font-weight:600;color:#2563eb;">{{ seg.departure_iata|default:"" }}</p>
+                          {% if seg.departure_terminal %}<p style="margin:2px 0 0;font-size:0.75rem;color:#64748b;">Terminal {{ seg.departure_terminal }}</p>{% endif %}
+                        </td>
+                        <td style="vertical-align:top;width:10%;text-align:center;padding-top:8px;">
+                          <span style="display:inline-block;width:24px;height:24px;background:#d1fae5;border-radius:50%;line-height:24px;font-size:0.7rem;">→</span>
+                        </td>
+                        <td style="vertical-align:top;width:45%;">
+                          <p style="margin:0 0 4px;font-size:0.7rem;font-weight:600;text-transform:uppercase;color:#94a3b8;">Arrival</p>
+                          <p style="margin:0;font-size:1rem;font-weight:700;color:#0f172a;">{{ seg.arrival_date|flight_date|default:"" }}</p>
+                          <p style="margin:2px 0 0;font-size:0.9rem;font-weight:600;color:#64748b;">{{ seg.arrival_time|default:"" }}</p>
+                          <p style="margin:6px 0 0;font-size:0.95rem;font-weight:600;color:#059669;">{{ seg.arrival_iata|default:"" }}</p>
+                          {% if seg.arrival_terminal %}<p style="margin:2px 0 0;font-size:0.75rem;color:#64748b;">Terminal {{ seg.arrival_terminal }}</p>{% endif %}
+                        </td>
+                      </tr>
+                    </table>
+                    <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;padding-top:12px;border-top:1px solid #e2e8f0;">
+                      <tr>
+                        <td style="font-size:0.8rem;color:#64748b;">
+                          <strong style="color:#0f172a;">{{ seg.carrier_name|default:"" }}</strong>
+                          {% if seg.carrier_code or seg.number %} ({{ seg.carrier_code|default:"" }} {{ seg.number|default:"" }}){% endif %}
+                          {% if seg.aircraft_code %} · {{ seg.aircraft_code }}{% endif %}
+                          {% if seg.duration %} · {{ seg.duration }}{% endif %}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              {% endfor %}
+              {% if flight.return_leg and flight.return_leg.duration %}<p style="margin:0 0 0 4px;font-size:0.8rem;color:#64748b;">Duration: {{ flight.return_leg.duration }}</p>{% endif %}
+            </td>
+          </tr>
+          {% endif %}
+
+          <!-- Fallback: no segments (minimal payload) -->
+          {% if not flight.ob_segments %}
+          <tr>
+            <td style="padding:0 32px 24px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:12px;">
+                <tr>
+                  <td width="50%" style="padding:18px 20px;background:#fafafa;border-right:1px solid #e2e8f0;">
+                    <p style="margin:0 0 6px;font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;">Departure</p>
+                    <p style="margin:0;font-size:1rem;font-weight:700;color:#0f172a;">{{ flight.departure_date|flight_date|default:"" }}</p>
+                    <p style="margin:2px 0 0;font-size:0.9rem;color:#64748b;">{{ flight.departure_time|default:"" }}</p>
+                    <p style="margin:4px 0 0;font-size:1rem;font-weight:600;color:#2563eb;">{{ flight.departure_iata|default:"" }}</p>
+                  </td>
+                  <td width="50%" style="padding:18px 20px;background:#fafafa;">
+                    <p style="margin:0 0 6px;font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;">Arrival</p>
+                    <p style="margin:0;font-size:1rem;font-weight:700;color:#0f172a;">{{ flight.arrival_date|flight_date|default:"" }}</p>
+                    <p style="margin:2px 0 0;font-size:0.9rem;color:#64748b;">{{ flight.arrival_time|default:"" }}</p>
+                    <p style="margin:4px 0 0;font-size:1rem;font-weight:600;color:#059669;">{{ flight.arrival_iata|default:"" }}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          {% endif %}
+
+          <!-- TOTAL -->
+          <tr>
+            <td style="padding:0 32px 24px;">
+              <p style="margin:0 0 10px;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#64748b;">Summary</p>
+              <table width="100%" cellpadding="0" cellspacing="0" style="font-size:0.9rem;color:#64748b;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">
+                <tr>
+                  <td style="padding:14px 20px;border-bottom:1px solid #e2e8f0;">Total price</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;color:#2563eb;">{{ flight.price_display|default:"" }}</td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 20px;border-bottom:1px solid #e2e8f0;">Total duration</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;color:#0f172a;">{{ flight.total_duration|default:"" }}</td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 20px;border-bottom:1px solid #e2e8f0;">Stops</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:600;color:#0f172a;">{{ flight.stop_label|default:"" }}</td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 20px;">Currency</td>
+                  <td style="padding:14px 20px;text-align:right;font-weight:600;color:#0f172a;">{{ flight.currency|default:"USD" }}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <!-- Disclaimer -->
+          <tr>
+            <td style="padding:0 32px 24px;">
+              <p style="margin:0;font-size:0.8rem;color:#94a3b8;line-height:1.5;padding:14px 18px;background:#f8fafc;border-radius:8px;border-left:4px solid #e2e8f0;">Prices may change until booking. Verify all details on your travel provider before purchase. Times are local to each airport.</p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 32px 28px;border-top:1px solid #f1f5f9;">
+              <p style="margin:0;font-size:0.9rem;color:#64748b;">Best regards,<br><strong style="color:#0f172a;">{{ brand_name }} Team</strong></p>
             </td>
           </tr>
         </table>

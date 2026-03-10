@@ -1,18 +1,73 @@
-Flight Details
-{{ brand_name }}
+{% load flight_filters %}
+═══════════════════════════════════════════════════════════
+  FLIGHT ITINERARY — {{ brand_name }}
+═══════════════════════════════════════════════════════════
 
-Your selected flight:
+ROUTE & PRICE
+{{ flight.route_display|default:"Your route" }}
+{{ flight.price_display|default:"" }}
 
-Route: {{ flight.route_display|default:"Your route" }}
-Price: {{ flight.price_display|default:"" }}
-Airline: {{ flight.primary_airline|default:"" }}
-Stops: {{ flight.stop_label|default:"" }}
-Duration: {{ flight.total_duration|default:"" }}
+QUICK INFO
+• Airline: {{ flight.primary_airline|default:"" }}{% if flight.flight_number %} ({{ flight.flight_number }}){% endif %}
+• Stops: {{ flight.stop_label|default:"" }}
+• Total duration: {{ flight.total_duration|default:"" }}
+{% if flight.currency %}• Currency: {{ flight.currency }}{% endif %}
+{% if flight.id %}• Reference: {{ flight.id }}{% endif %}
 
-Departure: {{ flight.departure_date|default:"" }} {{ flight.departure_time|default:"" }} {{ flight.departure_iata|default:"" }}
-Arrival: {{ flight.arrival_date|default:"" }} {{ flight.arrival_time|default:"" }} {{ flight.arrival_iata|default:"" }}
+───────────────────────────────────────────────────────────
+{% if flight.ob_segments %}
+{% if flight.ret_segments %}OUTBOUND
+{% endif %}
+{% for seg in flight.ob_segments %}
+  {{ seg.carrier_name|default:"" }} {{ seg.carrier_code|default:"" }} {{ seg.number|default:"" }}
+  {{ seg.departure_iata|default:"" }} → {{ seg.arrival_iata|default:"" }}
+  Departure: {{ seg.departure_date|flight_date }} {{ seg.departure_time|default:"" }}
+  Arrival:   {{ seg.arrival_date|flight_date }} {{ seg.arrival_time|default:"" }}
+  {% if seg.duration %}Duration: {{ seg.duration }}{% endif %}
+  {% if seg.aircraft_code %}Aircraft: {{ seg.aircraft_code }}{% endif %}
 
-Prices may change until booking. Verify on your travel provider before purchase.
+{% endfor %}
+{% if flight.outbound and flight.outbound.duration %}Outbound total: {{ flight.outbound.duration }}
+{% endif %}
+{% endif %}
 
+{% if flight.ret_segments %}
+RETURN
+{% for seg in flight.ret_segments %}
+  {{ seg.carrier_name|default:"" }} {{ seg.carrier_code|default:"" }} {{ seg.number|default:"" }}
+  {{ seg.departure_iata|default:"" }} → {{ seg.arrival_iata|default:"" }}
+  Departure: {{ seg.departure_date|flight_date }} {{ seg.departure_time|default:"" }}
+  Arrival:   {{ seg.arrival_date|flight_date }} {{ seg.arrival_time|default:"" }}
+  {% if seg.duration %}Duration: {{ seg.duration }}{% endif %}
+  {% if seg.aircraft_code %}Aircraft: {{ seg.aircraft_code }}{% endif %}
+
+{% endfor %}
+{% if flight.return_leg and flight.return_leg.duration %}Return total: {{ flight.return_leg.duration }}
+{% endif %}
+───────────────────────────────────────────────────────────
+{% endif %}
+
+{% if not flight.ob_segments %}
+DEPARTURE
+Date: {{ flight.departure_date|flight_date }}  Time: {{ flight.departure_time|default:"" }}
+Airport: {{ flight.departure_iata|default:"" }}
+
+ARRIVAL
+Date: {{ flight.arrival_date|flight_date }}  Time: {{ flight.arrival_time|default:"" }}
+Airport: {{ flight.arrival_iata|default:"" }}
+───────────────────────────────────────────────────────────
+{% endif %}
+
+SUMMARY
+Total price:    {{ flight.price_display|default:"" }}
+Total duration: {{ flight.total_duration|default:"" }}
+Stops:          {{ flight.stop_label|default:"" }}
+Currency:       {{ flight.currency|default:"USD" }}
+
+DISCLAIMER
+Prices may change until booking. Verify all details on your
+travel provider before purchase. Times are local to each airport.
+
+───────────────────────────────────────────────────────────
 Best regards,
 {{ brand_name }} Team
